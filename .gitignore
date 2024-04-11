@@ -1,0 +1,13 @@
+## My ignored files
+
+# Testing images
+*/7m.fits
+
+# File extensions
+*.eps
+*.pdf
+*.gif
+
+# Log files
+*.log
+*.last
