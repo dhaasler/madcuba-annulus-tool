@@ -56,5 +56,4 @@ macro "Annulus 1 Tool Options" {
         makeOval(x-r1 + corr, y-r1 + corr, r1*2, r1*2);
         setKeyDown("none");
     }
-    setKeyDown("none");
 }
