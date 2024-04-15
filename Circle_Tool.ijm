@@ -18,7 +18,7 @@ var measure;
 macro "Circle Tool - C037 O00ee" {
     moving = false;
     getCursorLoc(x, y, z, flags);
-    index = Overlay.indexAt(x,y);
+    index = Overlay.indexAt(x,y);   // indexAt is present for 1.53 and above
     if (index>=0 && flags&alt!=0) {  // delete?
         Overlay.removeSelection(index);
         exit;

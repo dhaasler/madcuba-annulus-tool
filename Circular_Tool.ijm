@@ -10,7 +10,11 @@ macro "Circular Selection Tool -C00b-B11-O11cc-F6622" {
     if (selectionType==1 && x>x2-4 && x<x2+w+4 && y>y2-4 && y<y2+h+4)
         move(w, h);
     else
-        create(xcenter, ycenter);
+        radius = create(xcenter, ycenter);
+    // xcenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", xcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
+    // ycenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", ycenter);
+    // setKeyDown("alt");
+    // makeOval(xcenter0-radius/2, ycenter0-radius/2, radius, radius);
 }
 
 // move existing circular selection until mouse released
@@ -36,8 +40,8 @@ function create(xcenter, ycenter) {
         if (flags&16==0) {
             getBoundingRect(x, y, width, height);
             if (width==0 || height==0)
-                run("Select None");          
-           return;
+                run("Select None");         
+            return(radius2);
         }
         dx = (x - xcenter);
         dy = (y - ycenter);
@@ -48,5 +52,33 @@ function create(xcenter, ycenter) {
             makeOval(xcenter0-radius, ycenter0-radius, radius*2, radius*2);
         radius2 = radius;
         wait(10);
-    };
+    }
+}
+
+// draw circular selections as overlay until mouse released
+function createOverlay(xcenter, ycenter) {
+    radius2 = -1;
+    while (true) {
+        getCursorLoc(x, y, z, flags);
+        if (flags&16==0) {
+            getBoundingRect(x, y, width, height);
+            if (width==0 || height==0)
+                run("Select None");
+            Overlay.remove;
+            makeOval(xcenter0-radius, ycenter0-radius, radius*2, radius*2);
+            return(radius2);
+        }
+        dx = (x - xcenter);
+        dy = (y - ycenter);
+        radius = sqrt(dx*dx + dy*dy);
+        if (radius!=radius2)
+            xcenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", xcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
+            ycenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", ycenter);    // it is easier to just change to fits when drawing
+            Overlay.remove;
+            Overlay.drawEllipse(xcenter0-radius, ycenter0-radius, radius*2, radius*2);
+            Overlay.add;
+            Overlay.show;
+        radius2 = radius;
+        wait(10);
+    }
 }

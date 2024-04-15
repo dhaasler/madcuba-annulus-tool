@@ -6,29 +6,26 @@
  *     annulus [[x, y], [r1, r2]]
  */
 
+// Global Variables
 var x = 1;
 var y = 1;
 var z = 1;
 var flags = "None";
 var r1 = 10;
 var r2 = 15;
-var unitsVal = "deg";
+var unitsVal = "pix";
 var paint = false;
 var corr = 0;
 
 macro "Annulus 1 Tool - C037 O00ee O22aa T6b081" {  // C037 O00ee O3388 final annulus icon
-    height = call("FITS_CARD.getDbl","NAXIS2");
     getCursorLoc(x, y, z, flags);
     x = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));    // getBoundingRect and getCursorLoc use ImageJ coords
-    y = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));    // it is easier to just change to fits when drawing
-    makeOval(x-r2 + corr, y-r2 + corr, r2*2, r2*2);
-    setKeyDown("alt");
-    makeOval(x-r1 + corr, y-r1 + corr, r1*2, r1*2);
-    setKeyDown("none");
+    y = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
+    paintFromMenu();
+    roiManager("add");
 }
  
 macro "Annulus 1 Tool Options" {
-    height = call("FITS_CARD.getDbl","NAXIS2");
     Dialog.create("Annulus Properties");
     Dialog.addChoice("Units:", newArray("deg", "pix"), unitsVal);
     Dialog.addNumber("X:", x);
@@ -46,14 +43,30 @@ macro "Annulus 1 Tool Options" {
     unitsVal = Dialog.getChoice();
     paint = Dialog.getCheckbox();
     if (r1temp > r2) {
-        // exit macro if input r1 > r2
+        // exit macro and print error if input r1 > r2
         setKeyDown("Esc");
-        showMessage("Error", "Inner radius cannot be bigger than outer radius");
+        showMessage("Error", "Error: Inner radius cannot be bigger than the outer radius");
     } else r1 = r1temp;
     if (paint) {
+        paintFromMenu();
+    }
+}
+
+/*
+ * ---------------------------------
+ * ---------------------------------
+ * ------ AUXILIARY FUNCTIONS ------
+ * ---------------------------------
+ * ---------------------------------
+ */
+
+function paintFromMenu () {
+    if (unitsVal == "pix") {
         makeOval(x-r2 + corr, y-r2 + corr, r2*2, r2*2);
         setKeyDown("alt");
         makeOval(x-r1 + corr, y-r1 + corr, r1*2, r1*2);
         setKeyDown("none");
+    } else if (unitsVal == "deg") {
+        test = 0
     }
 }

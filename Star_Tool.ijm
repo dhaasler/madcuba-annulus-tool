@@ -20,22 +20,23 @@ var fillStar = true;
 macro "Star Tool - B1eC039T0f40*" {
     getCursorLoc(x, y, z, flags);
     x0=x; y0=y;
-    index = Overlay.indexAt(x,y);
-    if (index>=0 && flags&alt!=0) {  // remove
-        Overlay.removeSelection(index);
-        exit;
-    }
-    if (index>=0) {  // move
-       Overlay.activateSelection(index);
-       Roi.getBounds(x,y,w,h);
-       Roi.remove;
-       while ((flags&button)!=0) {
-          getCursorLoc(x, y, z, flags);
-          Overlay.moveSelection(index, x-w/2, y-h/2);
-          wait(20);
-       }
-       exit();
-    }
+    // index = Overlay.indexAt(x,y);   // indexAt is present for 1.53 and above
+    // index = "";
+    // if (index>=0 && flags&alt!=0) {  // remove
+    //     Overlay.removeSelection(index);
+    //     exit;
+    // }
+    // if (index>=0) {  // move
+    //    Overlay.activateSelection(index);
+    //    Roi.getBounds(x,y,w,h);
+    //    Roi.remove;
+    //    while ((flags&button)!=0) {
+    //       getCursorLoc(x, y, z, flags);
+    //       Overlay.moveSelection(index, x-w/2, y-h/2);
+    //       wait(20);
+    //    }
+    //    exit();
+    // }
     // or create a new one
     makeLine (x0,y0,x0+1,y0+1);
     while ((flags&button)!=0) {
@@ -54,15 +55,10 @@ macro "Star Tool - B1eC039T0f40*" {
         Roi.setStrokeWidth(lineWidth);
         col = toHex(getValue("rgb.foreground")); 
         while (lengthOf(col)<6) col = "0"+col;
-        if (fillStar)
-            Roi.setFillColor(col);
-        else
-            Roi.setStrokeColor(col);
-      }
-      if (Roi.size>0)
-         Overlay.addSelection;
-     Roi.remove;
-     wait(20);
+        Roi.setStrokeColor(col);
+    }
+    Overlay.addSelection;
+    wait(20);
 }
 
 macro "Star Tool Options" {
@@ -78,8 +74,8 @@ macro "Star Tool Options" {
     nPoints = Dialog.getNumber();
     minSize = Dialog.getNumber();
     ratio = 1 - Dialog.getNumber();
-    if (ratio<0) ratio=0;
-    if (ratio>1) ration = 1;
+    if (ratio<0) ratio = 0;
+    if (ratio>1) ratio = 1;
     lineWidth = Dialog.getNumber();
     fillStar = Dialog.getCheckbox;
     if (Dialog.getCheckbox)

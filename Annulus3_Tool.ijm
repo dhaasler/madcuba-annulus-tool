@@ -1,0 +1,70 @@
+/* 
+ * Custom made macro to create an annular RoI in MADCUBA.
+ * Creates the annulus directly when clicking the image
+ *
+ * In this first iteration the annulus is defined by the center of the circle [x, y], and by are inner and outer radii [r1, r2]:
+ *     annulus [[x, y], [r1, r2]]
+ */
+
+// Global Variables
+var x = 1;
+var y = 1;
+var z = 1;
+var button = 16;
+var alt = 8;
+var flags = "None";
+var r1 = 10;
+var r2 = 15;
+var unitsVal = "pix";
+var paint = false;
+var corr = 0;
+var previousx = 0;
+var previousy = 0;
+
+macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final annulus icon
+    getCursorLoc(x, y, z, flags);
+    xcenter = x; ycenter = y;
+    if (flags&alt!=0) {
+        while ((flags&16)!=0) {
+            getCursorLoc(x, y, z, flags);
+            dx = (x - xcenter);
+            dy = (y - ycenter);
+            r1 = sqrt(dx*dx + dy*dy);
+            previousx0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousx);    // getBoundingRect and getCursorLoc use ImageJ coords
+            previousy0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousy);    // it is easier to just change to fits when drawing
+            makeOval(previousx0-r1, previousy0-r1, r1*2, r1*2);
+            wait(10);
+        }
+        roiManager("reset");
+        makeOval(previousx0-r2, previousy0-r2, r2*2, r2*2);
+        setKeyDown("alt");
+        makeOval(previousx0-r1, previousy0-r1, r1*2, r1*2);
+        setKeyDown("none");
+        exit;
+    }
+    while ((flags&16)!=0) {
+        getCursorLoc(x, y, z, flags);
+        dx = (x - xcenter);
+        dy = (y - ycenter);
+        r2 = sqrt(dx*dx + dy*dy);
+        xcenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", xcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
+        ycenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", ycenter);    // it is easier to just change to fits when drawing
+        makeOval(xcenter0-r2, ycenter0-r2, r2*2, r2*2);
+        wait(10);
+    }
+    roiManager("add");
+    roiManager("show all");
+    wait(10);
+    previousx = xcenter;
+    previousy = ycenter;
+}
+
+// ESTE PARECE HACERLO BIEN PERO QUIERO NO USAR ROI MANAGER, O AL MENOS METER EL ANILLO FINAL EN ROI MANAGER
+
+/*
+ * ---------------------------------
+ * ---------------------------------
+ * ------ AUXILIARY FUNCTIONS ------
+ * ---------------------------------
+ * ---------------------------------
+ */
