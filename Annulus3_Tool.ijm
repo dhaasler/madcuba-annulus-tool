@@ -12,8 +12,11 @@ var x = 1;
 var y = 1;
 var z = 1;
 var flags = "None";
-var click = 16;
-var alt = 8;
+var shift=1;
+var ctrl=2;
+var leftButton=16;
+var rightButton=4;
+var alt=8;
 
 var r1 = 10;
 var r2 = 15;
@@ -30,7 +33,7 @@ macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final an
     xcenter = x; ycenter = y;
     if (flags&alt!=0) {     // enter here if pressing alt while click and dragging mouse
         Overlay.addSelection;       // add outer oval overlay while selecting inner oval
-        while ((flags&click)!=0) {
+        while ((flags&leftButton)!=0) {
             getCursorLoc(x, y, z, flags);
             dx = (x - previousXcenter);
             dy = (y - previousYcenter);
@@ -43,8 +46,25 @@ macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final an
         Overlay.remove;     // delete outer oval overlay to create annulus
         paintAnnulus();
         exit;
+    } else if (flags&ctrl!=0) {
+        print("you pressed ctrl");
+        getBoundingRect(x2, y2, w, h);
+        getCursorLoc(x0, y0, z0, flags0);   // store information of when I first clicked the ROI
+        while ((flags&leftButton)!=0) {
+            getCursorLoc(x, y, z, flags);
+            dx = x - (x0 - x2);     // calculate new the position inside the RoI after moving
+            dy = y - (y0 - y2);
+            dxFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", dx));
+            dyFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", dy));
+            setSelectionLocation(dxFits, dyFits);
+            wait(20);
+        }
+        getBoundingRect(x3, y3, w, h);  // Currently this option moves the center with integers. 
+        previousXcenter = x3 + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
+        previousYcenter = y3 + h/2;     // because the menu paints with ovals that accept float values and rounds them later into integers
+        exit;
     }
-    while ((flags&click)!=0) {      // enter here if only clic and dragging mouse
+    while ((flags&leftButton)!=0) {      // enter here if only clic and dragging mouse
         getCursorLoc(x, y, z, flags);
         dx = (x - xcenter);
         dy = (y - ycenter);
@@ -70,8 +90,8 @@ macro "Annulus 3 Tool Options" {
     Dialog.addCheckbox("Paint Region", paint);
     Dialog.show();
 
-    x = Dialog.getNumber();
-    y = Dialog.getNumber();
+    previousXcenter = Dialog.getNumber();
+    previousYcenter = Dialog.getNumber();
     r1temp = Dialog.getNumber();
     r2 = Dialog.getNumber();
     unitsVal = Dialog.getChoice();
@@ -96,7 +116,7 @@ macro "Annulus 3 Tool Options" {
  * ---------------------------------
  */
 
- function paintAnnulus () {
+function paintAnnulus() {
     if (unitsVal == "pix") {
         makeOval(previousXcenterFits-r2, previousYcenterFits-r2, r2*2, r2*2);
         setKeyDown("alt");
@@ -105,4 +125,8 @@ macro "Annulus 3 Tool Options" {
     } else if (unitsVal == "deg") {
         test = 0
     }
+}
+
+function moveAnnulus() {
+
 }
