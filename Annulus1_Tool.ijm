@@ -40,6 +40,7 @@ macro "Annulus 1 Tool Options" {
         r1 = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2 = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
+    // dialog layout
     Dialog.create("Annulus Properties");
     Dialog.addChoice("Units:", newArray("deg", "pix"), unitsVal);
     Dialog.addNumber("X:", x);
@@ -50,7 +51,7 @@ macro "Annulus 1 Tool Options" {
     Dialog.addCheckbox("Paint Region", paint);
     Dialog.addChoice("Update values", newArray("do not update", "pix", "deg"), "do not update");
     Dialog.show();
-
+    // read data
     x = Dialog.getNumber();
     y = Dialog.getNumber();
     r1temp = Dialog.getNumber();
@@ -58,13 +59,11 @@ macro "Annulus 1 Tool Options" {
     unitsVal = Dialog.getChoice();
     paint = Dialog.getCheckbox();
     updateValuesTo = Dialog.getChoice();
-
     // exit macro and print error if input r1 > r2
     if (r1temp > r2) {
         setKeyDown("Esc");
         showMessage("Error", "Error: Inner radius cannot be bigger than the outer radius");
     } else r1 = r1temp;
-
     // transform everything back to pixels
     if (unitsVal == "deg") {
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", x, y, "");
@@ -77,7 +76,6 @@ macro "Annulus 1 Tool Options" {
     if (paint) {
         paintFromMenu();
     }
-
     // Update values
     valuesUpdated = false;  // for reruns of options after updating
     if (updateValuesTo != "do not update") {
