@@ -49,11 +49,11 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
     } else if (flags&ctrl!=0) {
         print("you pressed ctrl");
         getBoundingRect(x2, y2, w, h);
-        getCursorLoc(x0, y0, z0, flags0);   // store information of when I first clicked the ROI
+        getCursorLoc(x0, y0, z0, flags0);   // store information of where I first clicked inside the ROI
         while ((flags&leftButton)!=0) {
             getCursorLoc(x, y, z, flags);
             dx = x - (x0 - x2);     // calculate new the position inside the RoI after moving
-            dy = y - (y0 - y2);
+            dy = y - (y0 - y2) - 1;     // -1 because after clicking the selction moves 1 pixel down (may be a problem of coord transformation)
             dxFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", dx));
             dyFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", dy));
             setSelectionLocation(dxFits, dyFits);
