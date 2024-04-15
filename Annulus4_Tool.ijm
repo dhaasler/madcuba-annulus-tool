@@ -1,7 +1,7 @@
 /* 
  * Custom made macro to create an annular RoI in MADCUBA.
  * First creates the outer oval, then by pressing alt and dragging, it creates the inner radius. 
- * This uses an overlay for the representation of the outer oval while drawing the inner one.
+ * This uses roi manager for the representation of the outer oval while drawing the inner one.
  *
  * In this first iteration the annulus is defined by the center of the circle [x, y], and by are inner and outer radii [r1, r2]:
  *     annulus [[x, y], [r1, r2]]
@@ -22,11 +22,10 @@ var corr = 0;
 var previousx = 0;
 var previousy = 0;
 
-macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final annulus icon
+macro "Annulus 4 Tool - C037 O00ee O22aa T6b084" {  // C037 O00ee O3388 final annulus icon
     getCursorLoc(x, y, z, flags);
     xcenter = x; ycenter = y;
     if (flags&alt!=0) {
-        Overlay.addSelection;
         while ((flags&click)!=0) {
             getCursorLoc(x, y, z, flags);
             dx = (x - xcenter);
@@ -35,13 +34,14 @@ macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final an
             previousx0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousx);    // getBoundingRect and getCursorLoc use ImageJ coords
             previousy0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousy);    // it is easier to just change to fits when drawing
             makeOval(previousx0-r1, previousy0-r1, r1*2, r1*2);
-            wait(25);
+            wait(10);
         }
-        Overlay.remove;
+        roiManager("reset");
         makeOval(previousx0-r2, previousy0-r2, r2*2, r2*2);
         setKeyDown("alt");
         makeOval(previousx0-r1, previousy0-r1, r1*2, r1*2);
         setKeyDown("none");
+        roiManager("add");
         exit;
     }
     while ((flags&click)!=0) {
@@ -52,12 +52,16 @@ macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final an
         xcenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", xcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
         ycenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", ycenter);    // it is easier to just change to fits when drawing
         makeOval(xcenter0-r2, ycenter0-r2, r2*2, r2*2);
-        wait(20);
+        wait(10);
     }
+    roiManager("add");
+    roiManager("show all");
     wait(10);
     previousx = xcenter;
     previousy = ycenter;
 }
+
+// ESTE PARECE HACERLO BIEN PERO QUIERO NO USAR ROI MANAGER, O AL MENOS METER EL ANILLO FINAL EN ROI MANAGER
 
 /*
  * ---------------------------------

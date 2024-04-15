@@ -22,7 +22,6 @@ macro "Annulus 1 Tool - C037 O00ee O22aa T6b081" {  // C037 O00ee O3388 final an
     x = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));    // getBoundingRect and getCursorLoc use ImageJ coords
     y = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
     paintFromMenu();
-    roiManager("add");
 }
  
 macro "Annulus 1 Tool Options" {
