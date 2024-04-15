@@ -11,52 +11,81 @@
 var x = 1;
 var y = 1;
 var z = 1;
+var flags = "None";
 var click = 16;
 var alt = 8;
-var flags = "None";
+
 var r1 = 10;
 var r2 = 15;
 var unitsVal = "pix";
+
 var paint = false;
 var corr = 0;
-var previousx = 0;
-var previousy = 0;
+
+var previousXcenter = 0;
+var previousYcenter = 0;
 
 macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final annulus icon
     getCursorLoc(x, y, z, flags);
     xcenter = x; ycenter = y;
-    if (flags&alt!=0) {
-        Overlay.addSelection;
+    if (flags&alt!=0) {     // enter here if pressing alt while click and dragging mouse
+        Overlay.addSelection;       // add outer oval overlay while selecting inner oval
         while ((flags&click)!=0) {
             getCursorLoc(x, y, z, flags);
-            dx = (x - xcenter);
-            dy = (y - ycenter);
+            dx = (x - previousXcenter);
+            dy = (y - previousYcenter);
             r1 = sqrt(dx*dx + dy*dy);
-            previousx0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousx);    // getBoundingRect and getCursorLoc use ImageJ coords
-            previousy0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousy);    // it is easier to just change to fits when drawing
-            makeOval(previousx0-r1, previousy0-r1, r1*2, r1*2);
-            wait(25);
+            previousXcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousXcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
+            previousYcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousYcenter);    // it is easier to just change to fits when drawing
+            makeOval(previousXcenterFits-r1, previousYcenterFits-r1, r1*2, r1*2);
+            wait(20);
         }
-        Overlay.remove;
-        makeOval(previousx0-r2, previousy0-r2, r2*2, r2*2);
-        setKeyDown("alt");
-        makeOval(previousx0-r1, previousy0-r1, r1*2, r1*2);
-        setKeyDown("none");
+        Overlay.remove;     // delete outer oval overlay to create annulus
+        paintAnnulus();
         exit;
     }
-    while ((flags&click)!=0) {
+    while ((flags&click)!=0) {      // enter here if only clic and dragging mouse
         getCursorLoc(x, y, z, flags);
         dx = (x - xcenter);
         dy = (y - ycenter);
         r2 = sqrt(dx*dx + dy*dy);
-        xcenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", xcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
-        ycenter0 = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", ycenter);    // it is easier to just change to fits when drawing
-        makeOval(xcenter0-r2, ycenter0-r2, r2*2, r2*2);
+        xcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", xcenter);    // getBoundingRect and getCursorLoc use ImageJ coords
+        ycenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", ycenter);    // it is easier to just change to fits when drawing
+        makeOval(xcenterFits-r2, ycenterFits-r2, r2*2, r2*2);
         wait(20);
     }
     wait(10);
-    previousx = xcenter;
-    previousy = ycenter;
+    previousXcenter = xcenter;
+    previousYcenter = ycenter;
+}
+
+macro "Annulus 3 Tool Options" {
+    Dialog.create("Annulus Properties");
+    Dialog.addChoice("Units:", newArray("deg", "pix"), unitsVal);
+    Dialog.addNumber("X:", previousXcenter);
+    Dialog.addToSameRow() 
+    Dialog.addNumber("Y:", previousYcenter);
+    Dialog.addNumber("Inner radius:", r1);
+    Dialog.addNumber("Outer radius:", r2);
+    Dialog.addCheckbox("Paint Region", paint);
+    Dialog.show();
+
+    x = Dialog.getNumber();
+    y = Dialog.getNumber();
+    r1temp = Dialog.getNumber();
+    r2 = Dialog.getNumber();
+    unitsVal = Dialog.getChoice();
+    paint = Dialog.getCheckbox();
+    if (r1temp > r2) {
+        // exit macro and print error if input r1 > r2
+        setKeyDown("Esc");
+        showMessage("Error", "Error: Inner radius cannot be bigger than the outer radius");
+    } else r1 = r1temp;
+    if (paint) {
+        previousXcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousXcenter);
+        previousYcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousYcenter);
+        paintAnnulus();
+    }
 }
 
 /*
@@ -66,3 +95,14 @@ macro "Annulus 3 Tool - C037 O00ee O22aa T6b083" {  // C037 O00ee O3388 final an
  * ---------------------------------
  * ---------------------------------
  */
+
+ function paintAnnulus () {
+    if (unitsVal == "pix") {
+        makeOval(previousXcenterFits-r2, previousYcenterFits-r2, r2*2, r2*2);
+        setKeyDown("alt");
+        makeOval(previousXcenterFits-r1, previousYcenterFits-r1, r1*2, r1*2);
+        setKeyDown("none");
+    } else if (unitsVal == "deg") {
+        test = 0
+    }
+}

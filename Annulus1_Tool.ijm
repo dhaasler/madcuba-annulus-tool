@@ -34,7 +34,7 @@ macro "Annulus 1 Tool Options" {
     Dialog.addNumber("Outer radius:", r2);
     Dialog.addCheckbox("Paint Region", paint);
     Dialog.show();
-    title = Dialog.getString();
+
     x = Dialog.getNumber();
     y = Dialog.getNumber();
     r1temp = Dialog.getNumber();

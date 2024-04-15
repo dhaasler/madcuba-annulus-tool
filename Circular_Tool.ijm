@@ -4,7 +4,6 @@
 
 macro "Circular Selection Tool -C00b-B11-O11cc-F6622" {
     getCursorLoc(x, y, z, flags);
-    print(x + " " +  y);
     xcenter = x; ycenter = y;
     getBoundingRect(x2, y2, w, h) 
     if (selectionType==1 && x>x2-4 && x<x2+w+4 && y>y2-4 && y<y2+h+4)
