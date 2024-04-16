@@ -8,9 +8,9 @@
  */
 
 // Changelog
-var version = "v4.2.0";
+var version = "v4.3.0";
 var date = "20240416";
-var changelog = "Add radians as available units.";
+var changelog = "Separate center and radii units";
 
 // Global Variables
 // Mouse values and flags
