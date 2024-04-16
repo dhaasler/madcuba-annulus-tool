@@ -7,6 +7,11 @@
  *     annulus [[x, y], [r1, r2]]
  */
 
+var version = "v4.1.3";
+var date = "20240416";
+var changelog = "Add error messages when trying to move a selection or create<br>"
+              + "the inner radius when there is no previous selection present";
+
 // Global Variables
 // Mouse values and flags
 var x = 1;
@@ -41,6 +46,9 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
         valuesUpdated = false;
     }
     if (flags&alt!=0) {     // enter here if pressing alt while click and dragging mouse
+        if (selectionType == -1) {  // abort macro if no outer selection is present when trying to create inner radius
+            exit("Error: Inner radius cannot be created without an outer radius present. Create one first.");
+        }
         Overlay.addSelection;       // add outer oval overlay while selecting inner oval
         while ((flags&leftButton)!=0) {
             getCursorLoc(x, y, z, flags);
@@ -56,6 +64,9 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
         paintAnnulus();
         exit;
     } else if (flags&ctrl!=0) {     // first calculate the new location using ImageJ coordinates. Then set it using Fits coords
+        if (selectionType == -1) {  // abort macro if no outer selection is present when trying to create inner radius
+            exit("Error: Cannot move selection. There is no selection present");
+        }
         getBoundingRect(x2, y2, w, h);
         getCursorLoc(x0, y0, z0, flags0);   // store information of where I first clicked inside the ROI
         while ((flags&leftButton)!=0) {
@@ -67,15 +78,12 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
             setSelectionLocation(dxFits, dyFits);   // this option moves the center with integers.
             wait(20);
         }
-        print("new corner: " + dxFits + ", " + dyFits);
         getBoundingRect(x3, y3, w, h);
         x3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x3));
         y3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y3));
-        print("bounding rectangle new corner: " + x3Fits + ", " + y3Fits);
         previousXcenter = x3Fits + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
         previousYcenter = y3Fits - h/2 + 1;     // because the menu paints with ovals that accept float values and rounds them later into integers
         // +1 because of problems converting from ImageJ to Fits
-        print("new center: " + previousXcenter + ", " + previousYcenter);
         exit;
     }
     while ((flags&leftButton)!=0) {      // enter here if only clic and dragging mouse
@@ -104,15 +112,34 @@ macro "Annulus 2 Tool Options" {
         r2 = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
     // dialog layout
-    Dialog.create("Annulus Properties");
+    Dialog.create("Annulus Tool");
+    Dialog.addMessage(" Change annulus parameters");
+    Dialog.addMessage("To see the parameters in another coordinate system, \n"
+                    + "select it in the Update Values option.");
     Dialog.addChoice("Units:", newArray("deg", "pix"), unitsVal);
-    Dialog.addNumber("X:", previousXcenter);
+    Dialog.addNumber("Center Coordinates  X:", previousXcenter);
     Dialog.addToSameRow();
     Dialog.addNumber("Y:", previousYcenter);
     Dialog.addNumber("Inner radius:", r1);
     Dialog.addNumber("Outer radius:", r2);
     Dialog.addCheckbox("Paint Region", paint);
     Dialog.addChoice("Update values", newArray("do not update", "pix", "deg"), "do not update");
+    Dialog.addMessage("Open the options menu again to see the conversion");
+    html = "<html>"
+    + "<center><h2>Annulus Tool</h2></center>"
+    + "Click and drag mouse to create the outer radius of the annulus.<br>"
+    + "Click and drag while pressing 'alt' to create the inner radius.<br>"
+    + "Click and drag while pressing 'ctrl' to move the annular selection.<br><br>"
+    + "Using the menu, select the coordinates you want to work with in<br>"
+    + "the \"Units\" dropdown menu and input the desired parameters.<br>"
+    + "To manually paint the selection, check the \"Paint\" checkbox.<br><br>"
+    + "<strong>Important</strong>: To transform parameter values to another coordinate<br>"
+    + "system, select it in the Update values option and re-open the<br>"
+    + "options menu.<br><br>"
+    + "<h4>Changelog</h4>"
+    + version + " - " + date + " <br>"
+    + changelog;
+    Dialog.addHelp(html);
     Dialog.show();
     // read data
     previousXcenter = Dialog.getNumber();
@@ -124,8 +151,7 @@ macro "Annulus 2 Tool Options" {
     updateValuesTo = Dialog.getChoice();
     // exit macro and print error if input r1 > r2
     if (r1temp > r2) {
-        setKeyDown("Esc");
-        showMessage("Error", "Error: Inner radius cannot be bigger than the outer radius");
+        exit("Error: Inner radius cannot be bigger than the outer radius");
     } else r1 = r1temp;
     // transform everything back to pixels
     if (unitsVal == "deg") {

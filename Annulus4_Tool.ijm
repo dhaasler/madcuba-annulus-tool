@@ -61,6 +61,20 @@ macro "Annulus 4 Tool - C037 O00ee O22aa T6b084" {  // C037 O00ee O3388 final an
     previousy = ycenter;
 }
 
+macro "Annulus 4 Tool Options" {
+    Dialog.create("Radio Buttons");
+    items = newArray("New York", "London", "Paris", "Tokyo");
+    Dialog.addRadioButtonGroup("Cities", items, 2, 2, "Paris");
+    items = newArray("One", "Two", "Three");
+    Dialog.addRadioButtonGroup("Numbers", items, 1, 3, "One");
+    items = newArray("Alfa Romeo ", "Ferrari", "Lamborghini", "Maserati", "Lancia");
+    Dialog.addRadioButtonGroup("Italian Cars", items, 5, 1, "Ferrari");
+    Dialog.show;
+    print("Cities: "+Dialog.getRadioButton);
+    print("Numbers: "+Dialog.getRadioButton);
+    print("Cars: "+Dialog.getRadioButton);
+}
+
 // ESTE PARECE HACERLO BIEN PERO QUIERO NO USAR ROI MANAGER, O AL MENOS METER EL ANILLO FINAL EN ROI MANAGER
 
 /*
