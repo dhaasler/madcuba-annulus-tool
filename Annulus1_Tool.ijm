@@ -99,10 +99,6 @@ macro "Annulus 1 Tool Options" {
 
  /**
  * Paint an annulus.
- *
- * @param valx  RA arc in the sky with units
- * @param valy  DEC arc in the sky with units
- * @return  Converted arc
  */
 function paintFromMenu () {
     makeOval(x-r2 + corr, y-r2 + corr, r2*2, r2*2);

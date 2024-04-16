@@ -8,9 +8,10 @@
  */
 
 // Changelog
-var version = "v4.3.0";
+var version = "v4.5.1";
 var date = "20240416";
-var changelog = "Separate center and radii units";
+var changelog = "Change UI to offer two options: Paint Annulus or Convert units<br>"
+              + "Hotfix: add correction to ImageJ to Fits conversion.";
 
 // Global Variables
 // Mouse values and flags
@@ -33,7 +34,6 @@ var r2 = 15;
 var radiiUnits = "pix";
 var unitsVal = "pix";
 
-var paint = true;
 var corr = 0;
 
 macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final annulus icon
@@ -125,27 +125,28 @@ macro "Annulus 2 Tool Options" {
     // dialog layout
     availableUnits = newArray("deg", "rad", "pix");
     Dialog.create("Annulus Tool");
-    actionOptions = newArray("Paint Annulus", "Transform Coordinates");
+    actionOptions = newArray("Paint Annulus", "Convert Units");
     Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
     Dialog.addChoice("Center units:", availableUnits, centerUnits);
-    Dialog.addNumber("Center Coordinates  X:", previousXcenter);
+    Dialog.addNumber("Center   X:", previousXcenter);
     Dialog.addToSameRow();
     Dialog.addNumber("Y:", previousYcenter);
     Dialog.addChoice("Radii units:", availableUnits, radiiUnits);
     Dialog.addNumber("Inner radius:", r1);
     Dialog.addNumber("Outer radius:", r2);
-    Dialog.addCheckbox("Paint Region", paint);
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
     + "Click and drag while pressing 'alt' to create the inner radius.<br>"
     + "Click and drag while pressing 'ctrl' to move the annular selection.<br><br>"
-    + "Using the menu, select the coordinates you want to work with in<br>"
-    + "the \"Units\" dropdown menu and input the desired parameters.<br>"
-    + "To manually paint the selection, check the \"Paint\" checkbox.<br><br>"
-    + "<strong>Important</strong>: To transform parameter values to another coordinate<br>"
-    + "system, select it in the Update values option and re-open the<br>"
-    + "options menu.<br><br>"
+    + "To paint an annulus with given coordinates select the \"Paint<br>"
+    + "Annulus\" option, select the units with which to work, and input<br>"
+    + "the corresponding values.<br><br>"
+    + "To convert parameters to another units, select the \"Convert<br>"
+    + "units\" option, select the desired units from the dropdown<br>"
+    + "menus, and re-open the options window. Note that this option<br>"
+    + "will ignore input values and will use the previously selected<br>"
+    + "annulus.<br><br>"
     + "<h4>Changelog</h4>"
     + version + " - " + date + " <br>"
     + changelog;
@@ -160,38 +161,10 @@ macro "Annulus 2 Tool Options" {
         radiiUnits = Dialog.getChoice();
         r1temp = Dialog.getNumber();
         r2 = Dialog.getNumber();
-        paint = Dialog.getCheckbox();
         // exit macro and print error if input r1 > r2
         if (r1temp > r2) {
             exit("Error: Inner radius cannot be bigger than the outer radius");
         } else r1 = r1temp;
-        // transform everything back to pixels
-        if (centerUnits == "deg") {
-            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
-            previousXcenter = xpix;
-            previousYcenter = ypix;
-        }
-        if (radiiUnits == "deg") {
-            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-        }
-        if (centerUnits == "rad") {
-            previousXcenter = previousXcenter * 180.0/PI;
-            previousYcenter = previousYcenter * 180.0/PI;
-            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
-            previousXcenter = xpix;
-            previousYcenter = ypix;
-        }
-        if (radiiUnits == "rad") {
-            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-        }
-        // paint annulus from options menu
-        if (paint) {
-            paintAnnulus();
-        }
     } else {
         newCenterUnits = Dialog.getChoice();
         dumb1 = Dialog.getNumber();
@@ -199,31 +172,34 @@ macro "Annulus 2 Tool Options" {
         newRadiiUnits = Dialog.getChoice();
         dumb3 = Dialog.getNumber();
         dumb4 = Dialog.getNumber();
-        dumb5 = Dialog.getCheckbox();
-        // transform everything back to pixels
-        if (centerUnits == "deg") {
-            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
-            previousXcenter = xpix;
-            previousYcenter = ypix;
-        }
-        if (radiiUnits == "deg") {
-            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-        }
-        if (centerUnits == "rad") {
-            previousXcenter = previousXcenter * 180.0/PI;
-            previousYcenter = previousYcenter * 180.0/PI;
-            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
-            previousXcenter = xpix;
-            previousYcenter = ypix;
-        }
-        if (radiiUnits == "rad") {
-            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-        }
-        // Update values
+    }
+    // transform everything back to pixels
+    if (centerUnits == "deg") {
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        previousXcenter = xpix;
+        previousYcenter = ypix;
+    }
+    if (radiiUnits == "deg") {
+        r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+        r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+    }
+    if (centerUnits == "rad") {
+        previousXcenter = previousXcenter * 180.0/PI;
+        previousYcenter = previousYcenter * 180.0/PI;
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        previousXcenter = xpix;
+        previousYcenter = ypix;
+    }
+    if (radiiUnits == "rad") {
+        r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+        r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+    }
+    // paint annulus from options menu
+    paintAnnulus();
+    // Update values
+    if (action == "Convert Units") {
         centerUnits = newCenterUnits;
         radiiUnits = newRadiiUnits;
     }
@@ -237,9 +213,12 @@ macro "Annulus 2 Tool Options" {
  * ---------------------------------
  */
 
+ /**
+ * Paint an annulus using global variables.
+ */
 function paintAnnulus() {
     makeOval(previousXcenter-r2, previousYcenter-r2, r2*2, r2*2);
     setKeyDown("alt");
     makeOval(previousXcenter-r1, previousYcenter-r1, r1*2, r1*2);
     setKeyDown("none");
-    }
+}
