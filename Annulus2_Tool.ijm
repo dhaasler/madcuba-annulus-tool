@@ -7,6 +7,7 @@
  *     annulus [[x, y], [r1, r2]]
  */
 
+// Changelog
 var version = "v4.1.3";
 var date = "20240416";
 var changelog = "Add error messages when trying to move a selection or create<br>"
@@ -104,6 +105,7 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
 macro "Annulus 2 Tool Options" {
     // transform everything to current units
     if (unitsVal == "deg") {
+        // cant be changed at once because previousXcenter is used in the next statement. We need proxy variables xdeg and ydeg
         xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "");
         ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "");
         previousXcenter = xdeg;
@@ -111,19 +113,30 @@ macro "Annulus 2 Tool Options" {
         r1 = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2 = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
+    if (unitsVal == "rad") {
+        xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * PI/180.0;
+        yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * PI/180.0;
+        previousXcenter = xrad;
+        previousYcenter = yrad;
+        r1rad = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
+        r2rad = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
+        r1 = r1rad;
+        r2 = r2rad;
+    }
     // dialog layout
+    availableUnits = newArray("deg", "rad", "pix");
     Dialog.create("Annulus Tool");
     Dialog.addMessage(" Change annulus parameters");
     Dialog.addMessage("To see the parameters in another coordinate system, \n"
                     + "select it in the Update Values option.");
-    Dialog.addChoice("Units:", newArray("deg", "pix"), unitsVal);
+    Dialog.addChoice("Units:", availableUnits, unitsVal);
     Dialog.addNumber("Center Coordinates  X:", previousXcenter);
     Dialog.addToSameRow();
     Dialog.addNumber("Y:", previousYcenter);
     Dialog.addNumber("Inner radius:", r1);
     Dialog.addNumber("Outer radius:", r2);
     Dialog.addCheckbox("Paint Region", paint);
-    Dialog.addChoice("Update values", newArray("do not update", "pix", "deg"), "do not update");
+    Dialog.addChoice("Update values", Array.concat(newArray("do not update"), availableUnits), "do not update");
     Dialog.addMessage("Open the options menu again to see the conversion");
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
@@ -162,10 +175,18 @@ macro "Annulus 2 Tool Options" {
         r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
+    if (unitsVal == "rad") {
+        previousXcenter = previousXcenter * 180.0/PI;
+        previousYcenter = previousYcenter * 180.0/PI;
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        previousXcenter = xpix;
+        previousYcenter = ypix;
+        r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+        r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+    }
     // paint annulus from options menu
     if (paint) {
-        // previousXcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousXcenter);
-        // previousYcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousYcenter);
         paintAnnulus();
     }
     // Update values
@@ -174,6 +195,9 @@ macro "Annulus 2 Tool Options" {
         valuesUpdated = true;
         if (updateValuesTo == "deg") {
             unitsVal = "deg";
+        }
+        if (updateValuesTo == "rad") {
+            unitsVal = "rad";
         }
         if (updateValuesTo == "pix") {
             unitsVal = "pix";
