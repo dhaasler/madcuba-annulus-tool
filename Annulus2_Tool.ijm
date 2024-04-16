@@ -8,10 +8,9 @@
  */
 
 // Changelog
-var version = "v4.1.3";
+var version = "v4.2.0";
 var date = "20240416";
-var changelog = "Add error messages when trying to move a selection or create<br>"
-              + "the inner radius when there is no previous selection present";
+var changelog = "Add radians as available units.";
 
 // Global Variables
 // Mouse values and flags
@@ -28,23 +27,28 @@ var alt=8;
 // Annulus parameters
 var previousXcenter = 0;
 var previousYcenter = 0;
+var centerUnits = "pix";
 var r1 = 10;
 var r2 = 15;
+var radiiUnits = "pix";
 var unitsVal = "pix";
 
 var paint = false;
 var corr = 0;
 
-var updateValues = false;
-var valuesUpdated = false;
+var centerUpdated = false;
+var radiiUpdated = false;
 
 macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final annulus icon
     getCursorLoc(x, y, z, flags);
     xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
     yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
     xcenter = xFits; ycenter = yFits;
-    if (valuesUpdated) {
-        valuesUpdated = false;
+    if (centerUpdated) {
+        centerUpdated = false;
+    }
+    if (radiiUpdated) {
+        radiiUpdated = false;
     }
     if (flags&alt!=0) {     // enter here if pressing alt while click and dragging mouse
         if (selectionType == -1) {  // abort macro if no outer selection is present when trying to create inner radius
@@ -104,20 +108,24 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
 
 macro "Annulus 2 Tool Options" {
     // transform everything to current units
-    if (unitsVal == "deg") {
+    if (centerUnits == "deg") {
         // cant be changed at once because previousXcenter is used in the next statement. We need proxy variables xdeg and ydeg
         xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "");
         ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "");
         previousXcenter = xdeg;
         previousYcenter = ydeg;
+    }
+    if (radiiUnits == "deg") {
         r1 = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2 = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
-    if (unitsVal == "rad") {
+    if (centerUnits == "rad") {
         xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * PI/180.0;
         yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * PI/180.0;
         previousXcenter = xrad;
         previousYcenter = yrad;
+    }
+    if (radiiUnits == "rad") {
         r1rad = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         r2rad = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         r1 = r1rad;
@@ -126,18 +134,16 @@ macro "Annulus 2 Tool Options" {
     // dialog layout
     availableUnits = newArray("deg", "rad", "pix");
     Dialog.create("Annulus Tool");
-    Dialog.addMessage(" Change annulus parameters");
-    Dialog.addMessage("To see the parameters in another coordinate system, \n"
-                    + "select it in the Update Values option.");
-    Dialog.addChoice("Units:", availableUnits, unitsVal);
+    Dialog.addChoice("Center units:", availableUnits, centerUnits);
     Dialog.addNumber("Center Coordinates  X:", previousXcenter);
     Dialog.addToSameRow();
     Dialog.addNumber("Y:", previousYcenter);
+    Dialog.addChoice("Radii units:", availableUnits, radiiUnits);
     Dialog.addNumber("Inner radius:", r1);
     Dialog.addNumber("Outer radius:", r2);
     Dialog.addCheckbox("Paint Region", paint);
-    Dialog.addChoice("Update values", Array.concat(newArray("do not update"), availableUnits), "do not update");
-    Dialog.addMessage("Open the options menu again to see the conversion");
+    Dialog.addChoice("Update center values", Array.concat(newArray("do not update"), availableUnits), "do not update");
+    Dialog.addChoice("Update radii values", Array.concat(newArray("do not update"), availableUnits), "do not update");
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
@@ -155,33 +161,39 @@ macro "Annulus 2 Tool Options" {
     Dialog.addHelp(html);
     Dialog.show();
     // read data
+    centerUnits = Dialog.getChoice();
     previousXcenter = Dialog.getNumber();
     previousYcenter = Dialog.getNumber();
+    radiiUnits = Dialog.getChoice();
     r1temp = Dialog.getNumber();
     r2 = Dialog.getNumber();
-    unitsVal = Dialog.getChoice();
     paint = Dialog.getCheckbox();
-    updateValuesTo = Dialog.getChoice();
+    updateCenterTo = Dialog.getChoice();
+    updateRadiiTo = Dialog.getChoice();
     // exit macro and print error if input r1 > r2
     if (r1temp > r2) {
         exit("Error: Inner radius cannot be bigger than the outer radius");
     } else r1 = r1temp;
     // transform everything back to pixels
-    if (unitsVal == "deg") {
+    if (centerUnits == "deg") {
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
         previousXcenter = xpix;
         previousYcenter = ypix;
+    }
+    if (radiiUnits == "deg") {
         r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
-    if (unitsVal == "rad") {
+    if (centerUnits == "rad") {
         previousXcenter = previousXcenter * 180.0/PI;
         previousYcenter = previousYcenter * 180.0/PI;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
         previousXcenter = xpix;
         previousYcenter = ypix;
+    }
+    if (radiiUnits == "rad") {
         r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
         r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
     }
@@ -190,17 +202,30 @@ macro "Annulus 2 Tool Options" {
         paintAnnulus();
     }
     // Update values
-    valuesUpdated = false;  // for reruns of options after updating
-    if (updateValuesTo != "do not update") {
-        valuesUpdated = true;
-        if (updateValuesTo == "deg") {
-            unitsVal = "deg";
+    centerUpdated = false;  // for reruns of options after updating
+    if (updateCenterTo != "do not update") {
+        centerUpdated = true;
+        if (updateCenterTo == "deg") {
+            centerUnits = "deg";
         }
-        if (updateValuesTo == "rad") {
-            unitsVal = "rad";
+        if (updateCenterTo == "rad") {
+            centerUnits = "rad";
         }
-        if (updateValuesTo == "pix") {
-            unitsVal = "pix";
+        if (updateCenterTo == "pix") {
+            centerUnits = "pix";
+        }
+    }
+    radiiUpdated = false;  // for reruns of options after updating
+    if (updateRadiiTo != "do not update") {
+        radiiUpdated = true;
+        if (updateRadiiTo == "deg") {
+            radiiUnits = "deg";
+        }
+        if (updateRadiiTo == "rad") {
+            radiiUnits = "rad";
+        }
+        if (updateRadiiTo == "pix") {
+            radiiUnits = "pix";
         }
     }
 }
