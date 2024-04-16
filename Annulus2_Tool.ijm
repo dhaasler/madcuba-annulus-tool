@@ -33,23 +33,14 @@ var r2 = 15;
 var radiiUnits = "pix";
 var unitsVal = "pix";
 
-var paint = false;
+var paint = true;
 var corr = 0;
-
-var centerUpdated = false;
-var radiiUpdated = false;
 
 macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final annulus icon
     getCursorLoc(x, y, z, flags);
     xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
     yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
     xcenter = xFits; ycenter = yFits;
-    if (centerUpdated) {
-        centerUpdated = false;
-    }
-    if (radiiUpdated) {
-        radiiUpdated = false;
-    }
     if (flags&alt!=0) {     // enter here if pressing alt while click and dragging mouse
         if (selectionType == -1) {  // abort macro if no outer selection is present when trying to create inner radius
             exit("Error: Inner radius cannot be created without an outer radius present. Create one first.");
@@ -134,6 +125,8 @@ macro "Annulus 2 Tool Options" {
     // dialog layout
     availableUnits = newArray("deg", "rad", "pix");
     Dialog.create("Annulus Tool");
+    actionOptions = newArray("Paint Annulus", "Transform Coordinates");
+    Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
     Dialog.addChoice("Center units:", availableUnits, centerUnits);
     Dialog.addNumber("Center Coordinates  X:", previousXcenter);
     Dialog.addToSameRow();
@@ -142,8 +135,6 @@ macro "Annulus 2 Tool Options" {
     Dialog.addNumber("Inner radius:", r1);
     Dialog.addNumber("Outer radius:", r2);
     Dialog.addCheckbox("Paint Region", paint);
-    Dialog.addChoice("Update center values", Array.concat(newArray("do not update"), availableUnits), "do not update");
-    Dialog.addChoice("Update radii values", Array.concat(newArray("do not update"), availableUnits), "do not update");
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
@@ -161,72 +152,80 @@ macro "Annulus 2 Tool Options" {
     Dialog.addHelp(html);
     Dialog.show();
     // read data
-    centerUnits = Dialog.getChoice();
-    previousXcenter = Dialog.getNumber();
-    previousYcenter = Dialog.getNumber();
-    radiiUnits = Dialog.getChoice();
-    r1temp = Dialog.getNumber();
-    r2 = Dialog.getNumber();
-    paint = Dialog.getCheckbox();
-    updateCenterTo = Dialog.getChoice();
-    updateRadiiTo = Dialog.getChoice();
-    // exit macro and print error if input r1 > r2
-    if (r1temp > r2) {
-        exit("Error: Inner radius cannot be bigger than the outer radius");
-    } else r1 = r1temp;
-    // transform everything back to pixels
-    if (centerUnits == "deg") {
-        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
-        previousXcenter = xpix;
-        previousYcenter = ypix;
-    }
-    if (radiiUnits == "deg") {
-        r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-        r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-    }
-    if (centerUnits == "rad") {
-        previousXcenter = previousXcenter * 180.0/PI;
-        previousYcenter = previousYcenter * 180.0/PI;
-        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
-        previousXcenter = xpix;
-        previousYcenter = ypix;
-    }
-    if (radiiUnits == "rad") {
-        r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-        r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-    }
-    // paint annulus from options menu
-    if (paint) {
-        paintAnnulus();
-    }
-    // Update values
-    centerUpdated = false;  // for reruns of options after updating
-    if (updateCenterTo != "do not update") {
-        centerUpdated = true;
-        if (updateCenterTo == "deg") {
-            centerUnits = "deg";
+    action = Dialog.getRadioButton();
+    if (action == "Paint Annulus") {    // read new values, transform them back to pixels and paint
+        centerUnits = Dialog.getChoice();
+        previousXcenter = Dialog.getNumber();
+        previousYcenter = Dialog.getNumber();
+        radiiUnits = Dialog.getChoice();
+        r1temp = Dialog.getNumber();
+        r2 = Dialog.getNumber();
+        paint = Dialog.getCheckbox();
+        // exit macro and print error if input r1 > r2
+        if (r1temp > r2) {
+            exit("Error: Inner radius cannot be bigger than the outer radius");
+        } else r1 = r1temp;
+        // transform everything back to pixels
+        if (centerUnits == "deg") {
+            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+            previousXcenter = xpix;
+            previousYcenter = ypix;
         }
-        if (updateCenterTo == "rad") {
-            centerUnits = "rad";
+        if (radiiUnits == "deg") {
+            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         }
-        if (updateCenterTo == "pix") {
-            centerUnits = "pix";
+        if (centerUnits == "rad") {
+            previousXcenter = previousXcenter * 180.0/PI;
+            previousYcenter = previousYcenter * 180.0/PI;
+            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+            previousXcenter = xpix;
+            previousYcenter = ypix;
         }
-    }
-    radiiUpdated = false;  // for reruns of options after updating
-    if (updateRadiiTo != "do not update") {
-        radiiUpdated = true;
-        if (updateRadiiTo == "deg") {
-            radiiUnits = "deg";
+        if (radiiUnits == "rad") {
+            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
         }
-        if (updateRadiiTo == "rad") {
-            radiiUnits = "rad";
+        // paint annulus from options menu
+        if (paint) {
+            paintAnnulus();
         }
-        if (updateRadiiTo == "pix") {
-            radiiUnits = "pix";
+    } else {
+        newCenterUnits = Dialog.getChoice();
+        dumb1 = Dialog.getNumber();
+        dumb2 = Dialog.getNumber();
+        newRadiiUnits = Dialog.getChoice();
+        dumb3 = Dialog.getNumber();
+        dumb4 = Dialog.getNumber();
+        dumb5 = Dialog.getCheckbox();
+        // transform everything back to pixels
+        if (centerUnits == "deg") {
+            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+            previousXcenter = xpix;
+            previousYcenter = ypix;
         }
+        if (radiiUnits == "deg") {
+            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+        }
+        if (centerUnits == "rad") {
+            previousXcenter = previousXcenter * 180.0/PI;
+            previousYcenter = previousYcenter * 180.0/PI;
+            xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
+            ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+            previousXcenter = xpix;
+            previousYcenter = ypix;
+        }
+        if (radiiUnits == "rad") {
+            r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+            r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+        }
+        // Update values
+        centerUnits = newCenterUnits;
+        radiiUnits = newRadiiUnits;
     }
 }
 
