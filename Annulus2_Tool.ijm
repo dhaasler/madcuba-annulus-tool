@@ -55,26 +55,27 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
         Overlay.remove;     // delete outer oval overlay to create annulus
         paintAnnulus();
         exit;
-    } else if (flags&ctrl!=0) {
-        print("you pressed ctrl");
+    } else if (flags&ctrl!=0) {     // first calculate the new location using ImageJ coordinates. Then set it using Fits coords
         getBoundingRect(x2, y2, w, h);
-        x2Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x2));
-        y2Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y2));
         getCursorLoc(x0, y0, z0, flags0);   // store information of where I first clicked inside the ROI
-        x0Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x0));
-        y0Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y0));
         while ((flags&leftButton)!=0) {
             getCursorLoc(x, y, z, flags);
-            xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
-            yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
-            dx = xFits - (x0Fits - x2Fits);     // calculate new the position inside the RoI after moving
-            dy = yFits - (y0Fits - y2Fits) + 1;     // +1 because after clicking the selction moves 1 pixel down (may be a problem of coord transformation)
-            setSelectionLocation(dx, dy);
+            dx = x - (x0 - x2);     // calculate new the position inside the RoI after moving
+            dy = y - (y0 - y2) - 1;     // -1 because after clicking, the selection moves 1 pixel down (may be a problem of coord transformation)
+            dxFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", dx));
+            dyFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", dy));
+            setSelectionLocation(dxFits, dyFits);   // this option moves the center with integers.
             wait(20);
         }
-        getBoundingRect(x3, y3, w, h);  // Currently this option moves the center with integers. 
-        previousXcenter = x3 + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
-        previousYcenter = y3 + h/2;     // because the menu paints with ovals that accept float values and rounds them later into integers
+        print("new corner: " + dxFits + ", " + dyFits);
+        getBoundingRect(x3, y3, w, h);
+        x3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x3));
+        y3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y3));
+        print("bounding rectangle new corner: " + x3Fits + ", " + y3Fits);
+        previousXcenter = x3Fits + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
+        previousYcenter = y3Fits - h/2 + 1;     // because the menu paints with ovals that accept float values and rounds them later into integers
+        // +1 because of problems converting from ImageJ to Fits
+        print("new center: " + previousXcenter + ", " + previousYcenter);
         exit;
     }
     while ((flags&leftButton)!=0) {      // enter here if only clic and dragging mouse
@@ -137,8 +138,8 @@ macro "Annulus 2 Tool Options" {
     }
     // paint annulus from options menu
     if (paint) {
-        previousXcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousXcenter);
-        previousYcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousYcenter);
+        // previousXcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", previousXcenter);
+        // previousYcenterFits = call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", previousYcenter);
         paintAnnulus();
     }
     // Update values
