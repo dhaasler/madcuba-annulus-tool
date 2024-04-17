@@ -1,7 +1,7 @@
 /* 
  * Custom made tool to create an annular RoI in MADCUBA.
  * 
- * First create the outer oval by clicking and dragging, then by clicking and dragging while pressing alt, it creates the inner radius. 
+ * First create the outer oval by clicking and dragging, then create the inner oval by clicking and dragging while pressing alt. 
  * This version uses an overlay for the representation of the outer oval while drawing the inner one.
  *
  */
@@ -35,7 +35,7 @@ var unitsVal = "pix";
 
 var corr = 0;
 
-macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final annulus icon
+macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus icon
     getCursorLoc(x, y, z, flags);
     xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
     yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
@@ -96,7 +96,7 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
     previousYcenter = ycenter;
 }
 
-macro "Annulus 2 Tool Options" {
+macro "Annulus Tool Options" {
     // transform everything to current units
     if (centerUnits == 'pix') {
         newXcenter = previousXcenter;
@@ -176,13 +176,12 @@ macro "Annulus 2 Tool Options" {
     + "Click and drag while pressing 'alt' to create the inner radius.<br>"
     + "Click and drag while pressing 'ctrl' to move the annular selection.<br><br>"
     + "To paint an annulus with given coordinates select the \"Paint<br>"
-    + "Annulus\" option, select the units with which to work, and input<br>"
-    + "the corresponding values.<br><br>"
-    + "To convert parameters to another units, select the \"Convert<br>"
-    + "units\" option, select the desired units from the dropdown<br>"
-    + "menus, and re-open the options window. Note that this option<br>"
-    + "will ignore input values and will use the previously selected<br>"
-    + "annulus.<br><br>"
+    + "Annulus\" option, select the units with which to work, and input the<br>"
+    + "corresponding values.<br><br>"
+    + "To convert the current parameters to another units, select the<br>"
+    + "\"Convert units\" option, select the desired units from the dropdown<br>"
+    + "menus, and re-open the options window. Note that this option will<br>"
+    + "ignore input values and will use the previously selected annulus.<br><br>"
     + "<h4>Changelog</h4>"
     + version + " - " + date + " <br>"
     + changelog;
