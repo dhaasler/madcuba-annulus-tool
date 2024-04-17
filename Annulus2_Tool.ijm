@@ -1,16 +1,16 @@
 /* 
- * Custom made macro to create an annular RoI in MADCUBA.
- * First creates the outer oval, then by pressing alt and dragging, it creates the inner radius. 
- * This uses an overlay for the representation of the outer oval while drawing the inner one.
+ * Custom made tool to create an annular RoI in MADCUBA.
+ * 
+ * First create the outer oval by clicking and dragging, then by clicking and dragging while pressing alt, it creates the inner radius. 
+ * This version uses an overlay for the representation of the outer oval while drawing the inner one.
  *
- * In this first iteration the annulus is defined by the center of the circle [x, y], and by are inner and outer radii [r1, r2]:
- *     annulus [[x, y], [r1, r2]]
  */
 
 // Changelog
-var version = "v4.8.0";
+var version = "v4.8.1";
 var date = "20240417";
-var changelog = "Add sexagesimal coordinates<br>";
+var changelog = "Add sexagesimal coordinates<br>"
+              + "Hotfix: fix exception error when closing options and opening again";
 
 // Global Variables
 // Mouse values and flags
@@ -98,56 +98,64 @@ macro "Annulus 2 Tool - C037 O00ee O22aa T6b082" {  // C037 O00ee O3388 final an
 
 macro "Annulus 2 Tool Options" {
     // transform everything to current units
+    if (centerUnits == 'pix') {
+        newXcenter = previousXcenter;
+        newYcenter = previousYcenter;
+    }
+    if (radiiUnits == 'pix') {
+        newr1 = r1;
+        newr2 = r2;
+    }
     if (centerUnits == "deg") {
         // cant be changed at once because previousXcenter is used in the next statement. We need proxy variables xdeg and ydeg
         xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "");
         ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "");
-        previousXcenter = d2s(xdeg,6);
-        previousYcenter = d2s(ydeg,6);
+        newXcenter = d2s(xdeg,6);
+        newYcenter = d2s(ydeg,6);
     }
     if (radiiUnits == "deg") {
         r1deg = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2deg = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-        r1 = d2s(r1deg,6);
-        r2 = d2s(r2deg,6);
+        newr1 = d2s(r1deg,6);
+        newr2 = d2s(r2deg,6);
     }
     if (centerUnits == "arcmin") {
         xmin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * 60;
         ymin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * 60;
-        previousXcenter = xmin;
-        previousYcenter = ymin;
+        newXcenter = xmin;
+        newYcenter = ymin;
     }
     if (radiiUnits == "arcmin") {
-        r1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
-        r2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
+        newr1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
+        newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
     }
     if (centerUnits == "arcsec") {
         xsec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * 60 * 60;
         ysec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * 60 * 60;
-        previousXcenter = xsec;
-        previousYcenter = ysec;
+        newXcenter = xsec;
+        newYcenter = ysec;
     }
     if (radiiUnits == "arcsec") {
-        r1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
-        r2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
+        newr1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
+        newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
     }
     if (centerUnits == "rad") {
         xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * PI/180.0;
         yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * PI/180.0;
-        previousXcenter = d2s(xrad,8);
-        previousYcenter = d2s(yrad,8);
+        newXcenter = d2s(xrad,8);
+        newYcenter = d2s(yrad,8);
     }
     if (radiiUnits == "rad") {
         r1rad = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         r2rad = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
-        r1 = d2s(r1rad,8);
-        r2 = d2s(r2rad,8);
+        newr1 = d2s(r1rad,8);
+        newr2 = d2s(r2rad,8);
     }
     if (centerUnits == "sexagesimal") {
-        ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",previousXcenter, previousYcenter,"");
-        dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString",previousXcenter, previousYcenter,"");
-        previousXcenter = ra;
-        previousYcenter = dec;
+        ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString", previousXcenter, previousYcenter,"");
+        dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString", previousXcenter, previousYcenter,"");
+        newXcenter = ra;
+        newYcenter = dec;
     }
     // dialog layout
     availableCenterUnits = newArray("deg", "rad", "arcmin", "arcsec", "sexagesimal", "pix");
@@ -156,12 +164,12 @@ macro "Annulus 2 Tool Options" {
     actionOptions = newArray("Paint Annulus", "Convert Units");
     Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
     Dialog.addChoice("Center units:", availableCenterUnits, centerUnits);
-    Dialog.addString("Center   X:", previousXcenter,15);
+    Dialog.addString("Center   X:", newXcenter,15);
     // Dialog.addToSameRow();
-    Dialog.addString("Y:", previousYcenter,15);
+    Dialog.addString("Y:", newYcenter,15);
     Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
-    Dialog.addString("Inner radius:", r1,10);
-    Dialog.addString("Outer radius:", r2,10);
+    Dialog.addString("Inner radius:", newr1,10);
+    Dialog.addString("Outer radius:", newr2,10);
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
@@ -184,15 +192,15 @@ macro "Annulus 2 Tool Options" {
     action = Dialog.getRadioButton();
     if (action == "Paint Annulus") {    // read new values, transform them back to pixels and paint
         centerUnits = Dialog.getChoice();
-        previousXcenter = Dialog.getString();
-        previousYcenter = Dialog.getString();
+        newXcenter = Dialog.getString();
+        newYcenter = Dialog.getString();
         radiiUnits = Dialog.getChoice();
-        r1temp = Dialog.getString();
-        r2 = Dialog.getString();
+        newr1temp = Dialog.getString();
+        newr2 = Dialog.getString();
         // exit macro and print error if input r1 > r2
-        if (parseFloat(r1temp) > parseFloat(r2)) {
+        if (parseFloat(newr1temp) > parseFloat(newr2)) {
             exit("Error: Inner radius cannot be bigger than the outer radius");
-        } else r1 = r1temp;
+        } else newr1 = newr1temp;
     } else {
         newCenterUnits = Dialog.getChoice();
         dumb1 = Dialog.getString();
@@ -202,55 +210,63 @@ macro "Annulus 2 Tool Options" {
         dumb4 = Dialog.getNumber();
     }
     // transform everything back to pixels
+    if (centerUnits == 'pix') {
+        previousXcenter = newXcenter;
+        previousYcenter = newYcenter;
+    }
+    if (radiiUnits == 'pix') {
+        r1 = newr1;
+        r2 = newr2;
+    }
     if (centerUnits == "deg") {
-        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
         previousXcenter = xpix;
         previousYcenter = ypix;
     }
     if (radiiUnits == "deg") {
-        r1 = parseFloat(r1) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
-        r2 = parseFloat(r2) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+        r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
+        r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
     if (centerUnits == "arcmin") {
-        previousXcenter = parseFloat(previousXcenter) / 60;
-        previousYcenter = parseFloat(previousYcenter) / 60;
-        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        newXcenter = parseFloat(newXcenter) / 60;
+        newYcenter = parseFloat(newYcenter) / 60;
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
         previousXcenter = xpix;
         previousYcenter = ypix;
     }
     if (radiiUnits == "arcmin") {
-        r1 = parseFloat(r1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
-        r2 = parseFloat(r2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
+        r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
+        r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
     }
     if (centerUnits == "arcsec") {
-        previousXcenter = parseFloat(previousXcenter) / 60 / 60;
-        previousYcenter = parseFloat(previousYcenter) / 60 / 60;
-        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        newXcenter = parseFloat(newXcenter) / 60 / 60;
+        newYcenter = parseFloat(newYcenter) / 60 / 60;
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
         previousXcenter = xpix;
         previousYcenter = ypix;
     }
     if (radiiUnits == "arcsec") {
-        r1 = parseFloat(r1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
-        r2 = parseFloat(r2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
+        r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
+        r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
     }
     if (centerUnits == "rad") {
-        previousXcenter = parseFloat(previousXcenter) * 180.0/PI;
-        previousYcenter = parseFloat(previousYcenter) * 180.0/PI;
-        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", previousXcenter, previousYcenter, "");
-        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", previousXcenter, previousYcenter, "");
+        newXcenter = parseFloat(newXcenter) * 180.0/PI;
+        newYcenter = parseFloat(newYcenter) * 180.0/PI;
+        xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
+        ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
         previousXcenter = xpix;
         previousYcenter = ypix;
     }
     if (radiiUnits == "rad") {
-        r1 = parseFloat(r1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
-        r2 = parseFloat(r2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+        r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
+        r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
     }
     if (centerUnits == "sexagesimal") {
-        rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX",previousXcenter, previousYcenter, "");
-        decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY",previousXcenter, previousYcenter, "");
+        rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX", newXcenter, newYcenter, "");
+        decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY", newXcenter, newYcenter, "");
         previousXcenter = rapix;
         previousYcenter = decpix;
     }
