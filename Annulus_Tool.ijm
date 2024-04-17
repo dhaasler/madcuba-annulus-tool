@@ -25,8 +25,8 @@ var rightButton=4;
 var alt=8;
 
 // Annulus parameters
-var previousXcenter = 0;
-var previousYcenter = 0;
+var globaXcenter = 0;
+var globaYcenter = 0;
 var centerUnits = "pix";
 var r1 = 10;
 var r2 = 15;
@@ -49,10 +49,10 @@ macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus ico
             getCursorLoc(x, y, z, flags);
             xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
             yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
-            dx = (xFits - previousXcenter);
-            dy = (yFits - previousYcenter);
+            dx = (xFits - globaXcenter);
+            dy = (yFits - globaYcenter);
             r1 = sqrt(dx*dx + dy*dy);
-            makeOval(previousXcenter-r1, previousYcenter-r1, r1*2, r1*2);
+            makeOval(globaXcenter-r1, globaYcenter-r1, r1*2, r1*2);
             wait(20);
         }
         Overlay.remove;     // delete outer oval overlay to create annulus
@@ -76,8 +76,8 @@ macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus ico
         getBoundingRect(x3, y3, w, h);
         x3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x3));
         y3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y3));
-        previousXcenter = x3Fits + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
-        previousYcenter = y3Fits - h/2 + 1;     // because the menu paints with ovals that accept float values and rounds them later into integers
+        globaXcenter = x3Fits + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
+        globaYcenter = y3Fits - h/2 + 1;     // because the menu paints with ovals that accept float values and rounds them later into integers
         // +1 because of problems converting from ImageJ to Fits
         exit;
     }
@@ -92,24 +92,24 @@ macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus ico
         wait(20);
     }
     wait(10);
-    previousXcenter = xcenter;
-    previousYcenter = ycenter;
+    globaXcenter = xcenter;
+    globaYcenter = ycenter;
 }
 
 macro "Annulus Tool Options" {
     // transform everything to current units
     if (centerUnits == 'pix') {
-        newXcenter = previousXcenter;
-        newYcenter = previousYcenter;
+        newXcenter = globaXcenter;
+        newYcenter = globaYcenter;
     }
     if (radiiUnits == 'pix') {
         newr1 = r1;
         newr2 = r2;
     }
     if (centerUnits == "deg") {
-        // cant be changed at once because previousXcenter is used in the next statement. We need proxy variables xdeg and ydeg
-        xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "");
-        ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "");
+        // cant be changed at once because globaXcenter is used in the next statement. We need proxy variables xdeg and ydeg
+        xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globaXcenter, globaYcenter, "");
+        ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globaXcenter, globaYcenter, "");
         newXcenter = d2s(xdeg,6);
         newYcenter = d2s(ydeg,6);
     }
@@ -120,8 +120,8 @@ macro "Annulus Tool Options" {
         newr2 = d2s(r2deg,6);
     }
     if (centerUnits == "arcmin") {
-        xmin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * 60;
-        ymin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * 60;
+        xmin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globaXcenter, globaYcenter, "")) * 60;
+        ymin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globaXcenter, globaYcenter, "")) * 60;
         newXcenter = xmin;
         newYcenter = ymin;
     }
@@ -130,8 +130,8 @@ macro "Annulus Tool Options" {
         newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
     }
     if (centerUnits == "arcsec") {
-        xsec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * 60 * 60;
-        ysec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * 60 * 60;
+        xsec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globaXcenter, globaYcenter, "")) * 60 * 60;
+        ysec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globaXcenter, globaYcenter, "")) * 60 * 60;
         newXcenter = xsec;
         newYcenter = ysec;
     }
@@ -140,8 +140,8 @@ macro "Annulus Tool Options" {
         newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
     }
     if (centerUnits == "rad") {
-        xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", previousXcenter, previousYcenter, "")) * PI/180.0;
-        yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", previousXcenter, previousYcenter, "")) * PI/180.0;
+        xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globaXcenter, globaYcenter, "")) * PI/180.0;
+        yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globaXcenter, globaYcenter, "")) * PI/180.0;
         newXcenter = d2s(xrad,8);
         newYcenter = d2s(yrad,8);
     }
@@ -152,8 +152,8 @@ macro "Annulus Tool Options" {
         newr2 = d2s(r2rad,8);
     }
     if (centerUnits == "sexagesimal") {
-        ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString", previousXcenter, previousYcenter,"");
-        dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString", previousXcenter, previousYcenter,"");
+        ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString", globaXcenter, globaYcenter,"");
+        dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString", globaXcenter, globaYcenter,"");
         newXcenter = ra;
         newYcenter = dec;
     }
@@ -164,8 +164,7 @@ macro "Annulus Tool Options" {
     actionOptions = newArray("Paint Annulus", "Convert Units");
     Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
     Dialog.addChoice("Center units:", availableCenterUnits, centerUnits);
-    Dialog.addString("Center   X:", newXcenter,15);
-    // Dialog.addToSameRow();
+    Dialog.addString("X:", newXcenter,15);
     Dialog.addString("Y:", newYcenter,15);
     Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
     Dialog.addString("Inner radius:", newr1,10);
@@ -210,8 +209,8 @@ macro "Annulus Tool Options" {
     }
     // transform everything back to pixels
     if (centerUnits == 'pix') {
-        previousXcenter = newXcenter;
-        previousYcenter = newYcenter;
+        globaXcenter = newXcenter;
+        globaYcenter = newYcenter;
     }
     if (radiiUnits == 'pix') {
         r1 = newr1;
@@ -220,8 +219,8 @@ macro "Annulus Tool Options" {
     if (centerUnits == "deg") {
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
-        previousXcenter = xpix;
-        previousYcenter = ypix;
+        globaXcenter = xpix;
+        globaYcenter = ypix;
     }
     if (radiiUnits == "deg") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
@@ -232,8 +231,8 @@ macro "Annulus Tool Options" {
         newYcenter = parseFloat(newYcenter) / 60;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
-        previousXcenter = xpix;
-        previousYcenter = ypix;
+        globaXcenter = xpix;
+        globaYcenter = ypix;
     }
     if (radiiUnits == "arcmin") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
@@ -244,8 +243,8 @@ macro "Annulus Tool Options" {
         newYcenter = parseFloat(newYcenter) / 60 / 60;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
-        previousXcenter = xpix;
-        previousYcenter = ypix;
+        globaXcenter = xpix;
+        globaYcenter = ypix;
     }
     if (radiiUnits == "arcsec") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
@@ -256,8 +255,8 @@ macro "Annulus Tool Options" {
         newYcenter = parseFloat(newYcenter) * 180.0/PI;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
-        previousXcenter = xpix;
-        previousYcenter = ypix;
+        globaXcenter = xpix;
+        globaYcenter = ypix;
     }
     if (radiiUnits == "rad") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
@@ -266,8 +265,8 @@ macro "Annulus Tool Options" {
     if (centerUnits == "sexagesimal") {
         rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX", newXcenter, newYcenter, "");
         decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY", newXcenter, newYcenter, "");
-        previousXcenter = rapix;
-        previousYcenter = decpix;
+        globaXcenter = rapix;
+        globaYcenter = decpix;
     }
     // paint annulus from options menu
     paintAnnulus();
@@ -290,8 +289,8 @@ macro "Annulus Tool Options" {
  * Paint an annulus using global variables.
  */
 function paintAnnulus() {
-    makeOval(previousXcenter-r2, previousYcenter-r2, r2*2, r2*2);
+    makeOval(globaXcenter-r2, globaYcenter-r2, r2*2, r2*2);
     setKeyDown("alt");
-    makeOval(previousXcenter-r1, previousYcenter-r1, r1*2, r1*2);
+    makeOval(globaXcenter-r1, globaYcenter-r1, r1*2, r1*2);
     setKeyDown("none");
 }
