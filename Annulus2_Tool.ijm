@@ -8,9 +8,9 @@
  */
 
 // Changelog
-var version = "v4.7.0";
+var version = "v4.8.0";
 var date = "20240417";
-var changelog = "Change representation of values in options menu as strings<br>";
+var changelog = "Add sexagesimal coordinates<br>";
 
 // Global Variables
 // Mouse values and flags
@@ -143,22 +143,23 @@ macro "Annulus 2 Tool Options" {
         r1 = d2s(r1rad,8);
         r2 = d2s(r2rad,8);
     }
-    // if (centerUnits == "hdms") {
-    //     ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",previousXcenter,previousYcenter,"");
-    //     dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString",previousXcenter,previousYcenter,"");
-    //     previousXcenter = ra;
-    //     previousYcenter = dec;
-    // }
+    if (centerUnits == "sexagesimal") {
+        ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",previousXcenter, previousYcenter,"");
+        dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString",previousXcenter, previousYcenter,"");
+        previousXcenter = ra;
+        previousYcenter = dec;
+    }
     // dialog layout
-    availableUnits = newArray("deg", "rad", "arcmin", "arcsec", "pix");
+    availableCenterUnits = newArray("deg", "rad", "arcmin", "arcsec", "sexagesimal", "pix");
+    availableRadiiUnits = newArray("deg", "rad", "arcmin", "arcsec", "pix");
     Dialog.create("Annulus Tool");
     actionOptions = newArray("Paint Annulus", "Convert Units");
     Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
-    Dialog.addChoice("Center units:", availableUnits, centerUnits);
-    Dialog.addString("Center   X:", previousXcenter,10);
+    Dialog.addChoice("Center units:", availableCenterUnits, centerUnits);
+    Dialog.addString("Center   X:", previousXcenter,15);
     // Dialog.addToSameRow();
-    Dialog.addString("Y:", previousYcenter,10);
-    Dialog.addChoice("Radii units:", availableUnits, radiiUnits);
+    Dialog.addString("Y:", previousYcenter,15);
+    Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
     Dialog.addString("Inner radius:", r1,10);
     Dialog.addString("Outer radius:", r2,10);
     html = "<html>"
@@ -247,12 +248,12 @@ macro "Annulus 2 Tool Options" {
         r1 = parseFloat(r1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
         r2 = parseFloat(r2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
     }
-    // if (centerUnits == "hdms") {
-    //     rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX",ra,dec, "");
-    //     decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY",ra,dec, "");
-    //     previousXcenter = rapix;
-    //     previousYcenter = decpix;
-    // }
+    if (centerUnits == "sexagesimal") {
+        rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX",previousXcenter, previousYcenter, "");
+        decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY",previousXcenter, previousYcenter, "");
+        previousXcenter = rapix;
+        previousYcenter = decpix;
+    }
     // paint annulus from options menu
     paintAnnulus();
     // Update values
@@ -260,12 +261,6 @@ macro "Annulus 2 Tool Options" {
         centerUnits = newCenterUnits;
         radiiUnits = newRadiiUnits;
     }
-    // ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",previousXcenter,previousYcenter,"");
-    // dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString",previousXcenter,previousYcenter,"");
-    // print("RA: "+ra+", DEC: "+dec);
-    // rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX",ra,dec, "");
-    // decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY",ra,dec, "");
-    // print("RA: "+rapix+", DEC: "+decpix);
 }
 
 /*
