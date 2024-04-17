@@ -141,6 +141,12 @@ macro "Annulus 2 Tool Options" {
         r1 = r1rad;
         r2 = r2rad;
     }
+    // if (centerUnits == "hdms") {
+    //     ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",previousXcenter,previousYcenter,"");
+    //     dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString",previousXcenter,previousYcenter,"");
+    //     previousXcenter = ra;
+    //     previousYcenter = dec;
+    // }
     // dialog layout
     availableUnits = newArray("deg", "rad", "arcmin", "arcsec", "pix");
     Dialog.create("Annulus Tool");
@@ -239,6 +245,12 @@ macro "Annulus 2 Tool Options" {
         r1 = r1 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
         r2 = r2 / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
     }
+    // if (centerUnits == "hdms") {
+    //     rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX",ra,dec, "");
+    //     decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY",ra,dec, "");
+    //     previousXcenter = rapix;
+    //     previousYcenter = decpix;
+    // }
     // paint annulus from options menu
     paintAnnulus();
     // Update values
@@ -246,6 +258,12 @@ macro "Annulus 2 Tool Options" {
         centerUnits = newCenterUnits;
         radiiUnits = newRadiiUnits;
     }
+    ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",previousXcenter,previousYcenter,"");
+    dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString",previousXcenter,previousYcenter,"");
+    print("RA: "+ra+", DEC: "+dec);
+    rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX",ra,dec, "");
+    decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY",ra,dec, "");
+    print("RA: "+rapix+", DEC: "+decpix);
 }
 
 /*
@@ -256,7 +274,7 @@ macro "Annulus 2 Tool Options" {
  * ---------------------------------
  */
 
- /**
+/**
  * Paint an annulus using global variables.
  */
 function paintAnnulus() {
