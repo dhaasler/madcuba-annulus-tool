@@ -4,13 +4,29 @@ MADCUBA tool to create annular selections. [MADCUBA](https://cab.inta-csic.es/ma
 
 With this tool the user can select an annular region by clicking and dragging in an image, or by inputting the annulus parameters through an options window.
 
-The user can input the parameters in a wide set of units: image pixels, degrees, radians, arcminutes, arcseconds, and sexagesimal coordinates.
-
 The annulus is parametrized by its center and its two radii:
 
-1. Center coordinates X and Y
-2. Inner radius (r1)
-3. Outer radius (r2)
+- Center coordinates X and Y
+- Inner radius (r1)
+- Outer radius (r2)
+
+The user can input the parameters in a wide set of units:
+
+- Image pixels
+- Degrees
+- Radians
+- Arcminutes
+- Arcseconds
+- Sexagesimal coordinates.
+
+And using different coordinate systems:
+
+- J Equatorial (J2000)
+- B Equatorial (B1950)
+- Galactic (Gal)
+- ICRS Equatorial (ICRS)
+- Ecliptic (E2000)
+- HelioEcliptic (H2000)
 
 ## Installation
 
@@ -25,6 +41,6 @@ Click and drag while pressing 'ctrl' to move the annular selection.
 
 Double click or right-click the Tool icon to open the options menu where:
 
-1. To paint an annulus with given coordinates select the "Paint Annulus" option, select the units with which to work, and input the corresponding values.
-2. To convert the current parameters to another units, select the \"Convert units\" option, select the desired units from the dropdown menus, and re-open the options window.
+1. To paint an annulus with given coordinates select the "Paint Annulus" option, select the desired units and coordinate system, and input the corresponding values.
+2. To convert the current parameters to other units or coordinate systems, select the \"Transform coordinates" option, select the desired units and coordinate system from the dropdown menus, and re-open the options window.
    Note that this option will ignore input values and will use the previously selected annulus.
