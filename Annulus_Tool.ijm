@@ -7,10 +7,10 @@
  */
 
 // Changelog
-var version = "v4.8.2";
+var version = "v4.8.3";
 var date = "20240418";
 var changelog = "Add sexagesimal coordinates<br>"
-              + "Hotfix: fix error when converting radii pixels to degrees";
+              + "Change unit strings to a more readable format";
 
 // Global Variables
 // Mouse values and flags
@@ -27,11 +27,11 @@ var alt=8;
 // Annulus parameters
 var globalXcenter = 0;
 var globalYcenter = 0;
-var centerUnits = "pix";
+var centerUnits = "Pixels";
 var r1 = 10;
 var r2 = 15;
-var radiiUnits = "pix";
-var unitsVal = "pix";
+var radiiUnits = "Pixels";
+var unitsVal = "Pixels";
 
 var corr = 0;
 
@@ -98,68 +98,68 @@ macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus ico
 
 macro "Annulus Tool Options" {
     // transform everything to current units
-    if (centerUnits == 'pix') {
+    if (centerUnits == "Pixels") {
         newXcenter = globalXcenter;
         newYcenter = globalYcenter;
     }
-    if (radiiUnits == 'pix') {
+    if (radiiUnits == "Pixels") {
         newr1 = r1;
         newr2 = r2;
     }
-    if (centerUnits == "deg") {
+    if (centerUnits == "Degrees") {
         // cant be changed at once because globalXcenter is used in the next statement. We need proxy variables xdeg and ydeg
         xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globalXcenter, globalYcenter, "");
         ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globalXcenter, globalYcenter, "");
         newXcenter = d2s(xdeg,6);
         newYcenter = d2s(ydeg,6);
     }
-    if (radiiUnits == "deg") {
+    if (radiiUnits == "Degrees") {
         r1deg = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2deg = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         newr1 = d2s(r1deg,6);
         newr2 = d2s(r2deg,6);
     }
-    if (centerUnits == "arcmin") {
+    if (centerUnits == "Arcmin") {
         xmin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globalXcenter, globalYcenter, "")) * 60;
         ymin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globalXcenter, globalYcenter, "")) * 60;
         newXcenter = xmin;
         newYcenter = ymin;
     }
-    if (radiiUnits == "arcmin") {
+    if (radiiUnits == "Arcmin") {
         newr1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
         newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
     }
-    if (centerUnits == "arcsec") {
+    if (centerUnits == "Arcsec") {
         xsec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globalXcenter, globalYcenter, "")) * 60 * 60;
         ysec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globalXcenter, globalYcenter, "")) * 60 * 60;
         newXcenter = xsec;
         newYcenter = ysec;
     }
-    if (radiiUnits == "arcsec") {
+    if (radiiUnits == "Arcsec") {
         newr1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
         newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60 * 60;
     }
-    if (centerUnits == "rad") {
+    if (centerUnits == "Radians") {
         xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globalXcenter, globalYcenter, "")) * PI/180.0;
         yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globalXcenter, globalYcenter, "")) * PI/180.0;
         newXcenter = d2s(xrad,8);
         newYcenter = d2s(yrad,8);
     }
-    if (radiiUnits == "rad") {
+    if (radiiUnits == "Radians") {
         r1rad = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         r2rad = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         newr1 = d2s(r1rad,8);
         newr2 = d2s(r2rad,8);
     }
-    if (centerUnits == "sexagesimal") {
+    if (centerUnits == "Sexagesimal") {
         ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString", globalXcenter, globalYcenter,"");
         dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString", globalXcenter, globalYcenter,"");
         newXcenter = ra;
         newYcenter = dec;
     }
     // dialog layout
-    availableCenterUnits = newArray("deg", "rad", "arcmin", "arcsec", "sexagesimal", "pix");
-    availableRadiiUnits = newArray("deg", "rad", "arcmin", "arcsec", "pix");
+    availableCenterUnits = newArray("Pixels", "Degrees", "Radians", "Arcmin", "Arcsec", "Sexagesimal");
+    availableRadiiUnits = newArray("Pixels", "Degrees", "Radians", "Arcmin", "Arcsec");
     Dialog.create("Annulus Tool");
     actionOptions = newArray("Paint Annulus", "Convert Units");
     Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
@@ -208,25 +208,25 @@ macro "Annulus Tool Options" {
         dumb4 = Dialog.getNumber();
     }
     // transform everything back to pixels
-    if (centerUnits == 'pix') {
+    if (centerUnits == "Pixels") {
         globalXcenter = newXcenter;
         globalYcenter = newYcenter;
     }
-    if (radiiUnits == 'pix') {
+    if (radiiUnits == "Pixels") {
         r1 = parseFloat(newr1);
         r2 = parseFloat(newr2);
     }
-    if (centerUnits == "deg") {
+    if (centerUnits == "Degrees") {
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
         ypix = call("CONVERT_PIXELS_COORDINATES.coord2FitsY", newXcenter, newYcenter, "");
         globalXcenter = xpix;
         globalYcenter = ypix;
     }
-    if (radiiUnits == "deg") {
+    if (radiiUnits == "Degrees") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2"));
     }
-    if (centerUnits == "arcmin") {
+    if (centerUnits == "Arcmin") {
         newXcenter = parseFloat(newXcenter) / 60;
         newYcenter = parseFloat(newYcenter) / 60;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
@@ -234,11 +234,11 @@ macro "Annulus Tool Options" {
         globalXcenter = xpix;
         globalYcenter = ypix;
     }
-    if (radiiUnits == "arcmin") {
+    if (radiiUnits == "Arcmin") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
         r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60;
     }
-    if (centerUnits == "arcsec") {
+    if (centerUnits == "Arcsec") {
         newXcenter = parseFloat(newXcenter) / 60 / 60;
         newYcenter = parseFloat(newYcenter) / 60 / 60;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
@@ -246,11 +246,11 @@ macro "Annulus Tool Options" {
         globalXcenter = xpix;
         globalYcenter = ypix;
     }
-    if (radiiUnits == "arcsec") {
+    if (radiiUnits == "Arcsec") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
         r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) / 60 / 60;
     }
-    if (centerUnits == "rad") {
+    if (centerUnits == "Radians") {
         newXcenter = parseFloat(newXcenter) * 180.0/PI;
         newYcenter = parseFloat(newYcenter) * 180.0/PI;
         xpix = call("CONVERT_PIXELS_COORDINATES.coord2FitsX", newXcenter, newYcenter, "");
@@ -258,11 +258,11 @@ macro "Annulus Tool Options" {
         globalXcenter = xpix;
         globalYcenter = ypix;
     }
-    if (radiiUnits == "rad") {
+    if (radiiUnits == "Radians") {
         r1 = parseFloat(newr1) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
         r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 180.0/PI;
     }
-    if (centerUnits == "sexagesimal") {
+    if (centerUnits == "Sexagesimal") {
         rapix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsX", newXcenter, newYcenter, "");
         decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY", newXcenter, newYcenter, "");
         globalXcenter = rapix;

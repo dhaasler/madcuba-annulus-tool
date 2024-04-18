@@ -2,6 +2,7 @@
 
 | Version | Date       | Info                                                           | Details                                                           |
 | ------- | ---------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
+| v4.8.3  | 2024-04-18 | Change unit strings to a more readable format                  |                                                                   |
 | v4.8.2  | 2024-04-18 | Fix error when converting radii pixels to degrees              |                                                                   |
 | v4.8.1  | 2024-04-17 | Fix exception error when closing the options menu             | Use local variable for representation of values in options window |
 | v4.8    | 2024-04-17 | Add sexagesimal coordinates                                    |                                                                   |
