@@ -2,6 +2,7 @@
 
 | Version | Date       | Info                                                           | Details                                                           |
 | ------- | ---------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
+| v4.8.2  | 2024-04-18 | Fix error when converting radii pixels to degrees              |                                                                   |
 | v4.8.1  | 2024-04-17 | Fix exception error when closing the options menu             | Use local variable for representation of values in options window |
 | v4.8    | 2024-04-17 | Add sexagesimal coordinates                                    |                                                                   |
 | v4.7    | 2024-04-17 | Change representation of values in options menu as strings     |                                                                   |

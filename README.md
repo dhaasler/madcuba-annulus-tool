@@ -1,6 +1,6 @@
 # MADCUBA Annulus Tool
 
-MADCUBA tool to create annular selections. [MADCUBA](url:https://cab.inta-csic.es/madcuba/) is a software developed in the spanish Center of Astrobiology (CSIC-INTA) to analyze astronomical datacubes, and is built using the ImageJ infrastructure. This tool will not work correctly on any other ImageJ program.
+MADCUBA tool to create annular selections. [MADCUBA](https://cab.inta-csic.es/madcuba/) is a software developed in the spanish Center of Astrobiology (CSIC-INTA) to analyze astronomical datacubes, and is built using the ImageJ infrastructure. This tool will not work correctly on any other ImageJ program.
 
 With this tool the user can select an annular region by clicking and dragging in an image, or by inputting the annulus parameters through an options window.
 
