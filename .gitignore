@@ -1,7 +1,7 @@
 ## My ignored files
 
 # Testing images
-*/7m.fits
+images/
 
 # File extensions
 *.eps
