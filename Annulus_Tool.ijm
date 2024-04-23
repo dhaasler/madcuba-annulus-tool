@@ -9,7 +9,7 @@
 // Changelog
 var version = "v5.0.0";
 var date = "20240423";
-var changelog = "Add ability to export the annulus roi in pixel coords";
+var changelog = "Add ability to import and export the annulus roi in pixel coords";
 
 // Global Variables
 // Mouse values and flags
@@ -175,6 +175,7 @@ macro "Annulus Tool Options" {
     Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
     Dialog.addString("Inner radius:", newr1, 10);
     Dialog.addString("Outer radius:", newr2, 10);
+    Dialog.addCheckbox("Import ROI", false);
     Dialog.addCheckbox("Export ROI", false);
     // Dialog.addToSameRow();
     Dialog.addString("Saved file name", "annulus.dat", 16);
@@ -191,6 +192,9 @@ macro "Annulus Tool Options" {
     + "desired units and coordinate system from the dropdown menus,<br>"
     + "and re-open the options window. Note that this option will ignore<br>"
     + "input values and will use the previously selected annulus.<br><br>"
+    + "To import an annulus from a text file, check the \"Import ROI\"<br>"
+    + "checkbox. A window will appear asking the user to select the<br>"
+    + "annulus file.<br>"
     + "To export the annulus as a text file, check the \"Export ROI\"<br>"
     + "checkbox and input the desired file name. A window will appear<br>"
     + "asking the user to select the Folder in which to save the file.<br><br>"
@@ -210,6 +214,7 @@ macro "Annulus Tool Options" {
         radiiUnits = Dialog.getChoice();
         newr1temp = Dialog.getString();
         newr2 = Dialog.getString();
+        import = Dialog.getCheckbox();
         export = Dialog.getCheckbox();
         saveFile = Dialog.getString();
         // exit macro and print error if input r1 > r2
@@ -228,7 +233,8 @@ macro "Annulus Tool Options" {
         dumb3 = Dialog.getNumber();
         dumb4 = Dialog.getNumber();
         dumb5 = Dialog.getCheckbox();
-        dumb6 = Dialog.getString();
+        dumb6 = Dialog.getCheckbox();
+        dumb7 = Dialog.getString();
         if (newCenterUnits == "Sexagesimal" && (newCoordSystem == "Gal" || newCoordSystem == "E2000" || newCoordSystem == "H2000")) {
             exit("Warning: Coordinate system " + newCoordSystem + " does not accept sexagesimal units");
         }
@@ -294,6 +300,17 @@ macro "Annulus Tool Options" {
         decpix = call("CONVERT_PIXELS_COORDINATES.coordString2FitsY", newXcenter, newYcenter, coordSystem);
         globalXcenter = rapix;
         globalYcenter = decpix;
+    }
+
+    // import toi
+    if (import) {
+        path = File.openDialog("Select a ROI File");
+        annulusCommand = File.openAsString(path);
+        data = split(annulusCommand, "(),");
+        globalXcenter = data[1];
+        globalYcenter = data[2];
+        r1 = data[3];
+        r2 = data[4];
     }
 
     // paint annulus from options menu

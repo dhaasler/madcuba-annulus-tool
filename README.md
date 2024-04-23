@@ -55,4 +55,5 @@ Note that this option will ignore input values and will use the previously selec
 
 To check the installed version and read the instructions from within MADCUBA, select "Help" in the options window of the tool.
 
-To export the annulus as a text file, check the "Export ROI" checkbox and input the desired file name. A window will appear asking the user to select the Folder in which to save the file.
+To export the annulus as a text file, check the "Export ROI" checkbox and input the desired file name. A window will appear asking the user to select the Folder in which to save the file.  
+To import an annulus from a text file, check the "Import ROI" checkbox. A window will appear asking the user to select the annulus file.
