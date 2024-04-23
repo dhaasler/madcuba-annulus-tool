@@ -7,9 +7,9 @@
  */
 
 // Changelog
-var version = "v4.9.1";
+var version = "v5.0.0a";
 var date = "20240423";
-var changelog = "Add astronomical coordinate systems";
+var changelog = "Add ability to export the annulus roi in pixel coords";
 
 // Global Variables
 // Mouse values and flags
@@ -177,7 +177,7 @@ macro "Annulus Tool Options" {
     Dialog.addString("Outer radius:", newr2, 10);
     Dialog.addCheckbox("Export ROI", false);
     // Dialog.addToSameRow();
-    Dialog.addString("Save file name", "annulus.dat", 16);
+    Dialog.addString("Saved file name", "annulus.dat", 16);
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
@@ -191,6 +191,9 @@ macro "Annulus Tool Options" {
     + "desired units and coordinate system from the dropdown menus,<br>"
     + "and re-open the options window. Note that this option will ignore<br>"
     + "input values and will use the previously selected annulus.<br><br>"
+    + "To export the annulus as a text file, check the \"Export ROI\"<br>"
+    + "checkbox and input the desired file name. A window will appear<br>"
+    + "asking the user to select the Folder in which to save the file.<br><br>"
     + "<h4>Changelog</h4>"
     + version + " - " + date + " <br>"
     + changelog;
@@ -299,8 +302,8 @@ macro "Annulus Tool Options" {
     // export roi
     if (export) {
         path = getDirectory("Choose a Directory");      /* there is no save file command, only open file */
-        string = "makeAnnulus(" + globalXcenter + ", " + globalYcenter + ", " + r1 + ", " + r2 + ");";
-        File.saveString(string, path + saveFile);
+        annulusCommand = "makeAnnulus(" + globalXcenter + ", " + globalYcenter + ", " + r1 + ", " + r2 + ");";
+        File.saveString(annulusCommand, path + saveFile);
     }
 
     // update units for coordinate transformation
