@@ -22,7 +22,6 @@ var ctrl=2;
 var leftButton=16;
 var rightButton=4;
 var alt=8;
-
 // Annulus parameters
 var globalXcenter = 0;
 var globalYcenter = 0;
@@ -35,16 +34,17 @@ var unitsVal = "Pixels";
 
 var corr = 0;
 
-macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus icon
+macro "Annulus Tool - C037 O00ee O3388" {
     getCursorLoc(x, y, z, flags);
     xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
     yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
     xcenter = xFits; ycenter = yFits;
-    if (flags&alt!=0) {     // enter here if pressing alt while click and dragging mouse
-        if (selectionType == -1) {  // abort macro if no outer selection is present when trying to create inner radius
+    // create second oval and then the annulus
+    if (flags&alt!=0) {                 /* enter here if pressing alt while click and dragging mouse */
+        if (selectionType == -1) {      /* abort macro if no outer selection is present when trying to create inner radius */
             exit("Error: Inner radius cannot be created without an outer radius present. Create one first.");
         }
-        Overlay.addSelection;       // add outer oval overlay while selecting inner oval
+        Overlay.addSelection;           // add outer oval overlay while selecting inner oval
         while ((flags&leftButton)!=0) {
             getCursorLoc(x, y, z, flags);
             xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
@@ -58,29 +58,31 @@ macro "Annulus Tool - C037 O00ee O3388" {  // C037 O00ee O3388 final annulus ico
         Overlay.remove;     // delete outer oval overlay to create annulus
         paintAnnulus();
         exit;
-    } else if (flags&ctrl!=0) {     // first calculate the new location using ImageJ coordinates. Then set it using Fits coords
-        if (selectionType == -1) {  // abort macro if no outer selection is present when trying to create inner radius
+    // move selection
+    } else if (flags&ctrl!=0) {     /* first calculate the new location using ImageJ coordinates. Then set it using Fits coords */
+        if (selectionType == -1) {  /* abort macro if no outer selection is present when trying to create inner radius */
             exit("Error: Cannot move selection. There is no selection present");
         }
         getBoundingRect(x2, y2, w, h);
         getCursorLoc(x0, y0, z0, flags0);   // store information of where I first clicked inside the ROI
         while ((flags&leftButton)!=0) {
             getCursorLoc(x, y, z, flags);
-            dx = x - (x0 - x2);     // calculate new the position inside the RoI after moving
-            dy = y - (y0 - y2) - 1;     // -1 because after clicking, the selection moves 1 pixel down (may be a problem of coord transformation)
+            dx = x - (x0 - x2);         /* calculate new the position inside the RoI after moving */
+            dy = y - (y0 - y2) - 1;     /* -1 because after clicking, the selection moves 1 pixel down (may be a problem of coord transformation) */
             dxFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", dx));
             dyFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", dy));
-            setSelectionLocation(dxFits, dyFits);   // this option moves the center with integers.
+            setSelectionLocation(dxFits, dyFits);   // this option moves the center with integers
             wait(20);
         }
         getBoundingRect(x3, y3, w, h);
         x3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x3));
         y3Fits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y3));
-        globalXcenter = x3Fits + w/2;     // If trying to paint it with the Options Menu it will move the annulus slightly
-        globalYcenter = y3Fits - h/2 + 1;     // because the menu paints with ovals that accept float values and rounds them later into integers
-        // +1 because of problems converting from ImageJ to Fits
+        globalXcenter = x3Fits + w/2;       /* if trying to paint it with the Options Menu it will move the annulus slightly */
+        globalYcenter = y3Fits - h/2 + 1;   /* because the menu paints with ovals that accept float values and rounds them later into integers */
+                                            /* +1 because of problems converting from ImageJ to Fits */
         exit;
     }
+    // crate outer oval
     while ((flags&leftButton)!=0) {      // enter here if only clic and dragging mouse
         getCursorLoc(x, y, z, flags);
         xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
@@ -107,7 +109,7 @@ macro "Annulus Tool Options" {
         newr2 = r2;
     }
     if (centerUnits == "Degrees") {
-        // cant be changed at once because globalXcenter is used in the next statement. We need proxy variables xdeg and ydeg
+        // cant be changed at once because globalXcenter is used in the next statement. We need temp variables xdeg and ydeg
         xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", globalXcenter, globalYcenter, coordSystem);
         ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", globalXcenter, globalYcenter, coordSystem);
         newXcenter = d2s(xdeg,6);
@@ -157,8 +159,9 @@ macro "Annulus Tool Options" {
         newXcenter = ra;
         newYcenter = dec;
     }
+
     // dialog layout
-    availablecoordSystems = newArray("ICRS", "J2000", "B1950", "Gal", "E2000", "H2000");
+    availableCoordSystems = newArray("ICRS", "J2000", "B1950", "Gal", "E2000", "H2000");
     availableCenterUnits = newArray("Pixels", "Degrees", "Radians", "Arcmin", "Arcsec", "Sexagesimal");
     availableRadiiUnits = newArray("Pixels", "Degrees", "Radians", "Arcmin", "Arcsec");
     Dialog.create("Annulus Tool");
@@ -166,7 +169,7 @@ macro "Annulus Tool Options" {
     Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
     Dialog.addChoice("Center units:", availableCenterUnits, centerUnits);
     Dialog.addToSameRow();
-    Dialog.addChoice("", availablecoordSystems, coordSystem);
+    Dialog.addChoice("", availableCoordSystems, coordSystem);
     Dialog.addString("X:", newXcenter, 15);
     Dialog.addString("Y:", newYcenter, 15);
     Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
@@ -190,6 +193,7 @@ macro "Annulus Tool Options" {
     + changelog;
     Dialog.addHelp(html);
     Dialog.show();
+    
     // read data
     action = Dialog.getRadioButton();
     if (action == "Paint Annulus") {    // read new values, transform them back to pixels and paint
@@ -219,6 +223,7 @@ macro "Annulus Tool Options" {
             exit("Warning: Coordinate system " + newCoordSystem + " does not accept sexagesimal units");
         }
     }
+
     // transform everything back to pixels
     if (centerUnits == "Pixels") {
         globalXcenter = newXcenter;
@@ -280,9 +285,11 @@ macro "Annulus Tool Options" {
         globalXcenter = rapix;
         globalYcenter = decpix;
     }
+
     // paint annulus from options menu
     paintAnnulus();
-    // Update values
+
+    // update units for coordinate transformation
     if (action == "Transform Coordinates") {
         centerUnits = newCenterUnits;
         radiiUnits = newRadiiUnits;
