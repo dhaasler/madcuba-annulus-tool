@@ -175,6 +175,9 @@ macro "Annulus Tool Options" {
     Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
     Dialog.addString("Inner radius:", newr1, 10);
     Dialog.addString("Outer radius:", newr2, 10);
+    Dialog.addCheckbox("Export ROI", false);
+    // Dialog.addToSameRow();
+    Dialog.addString("Save file name", "annulus.dat", 16);
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
@@ -204,6 +207,8 @@ macro "Annulus Tool Options" {
         radiiUnits = Dialog.getChoice();
         newr1temp = Dialog.getString();
         newr2 = Dialog.getString();
+        export = Dialog.getCheckbox();
+        saveFile = Dialog.getString();
         // exit macro and print error if input r1 > r2
         if (parseFloat(newr1temp) > parseFloat(newr2)) {
             exit("Error: Inner radius cannot be bigger than the outer radius");
@@ -219,6 +224,8 @@ macro "Annulus Tool Options" {
         newRadiiUnits = Dialog.getChoice();
         dumb3 = Dialog.getNumber();
         dumb4 = Dialog.getNumber();
+        dumb5 = Dialog.getCheckbox();
+        dumb6 = Dialog.getString();
         if (newCenterUnits == "Sexagesimal" && (newCoordSystem == "Gal" || newCoordSystem == "E2000" || newCoordSystem == "H2000")) {
             exit("Warning: Coordinate system " + newCoordSystem + " does not accept sexagesimal units");
         }
@@ -288,6 +295,13 @@ macro "Annulus Tool Options" {
 
     // paint annulus from options menu
     paintAnnulus();
+
+    // export roi
+    if (export) {
+        path = getDirectory("Choose a Directory");      /* there is no save file command, only open file */
+        string = "makeAnnulus(" + globalXcenter + ", " + globalYcenter + ", " + r1 + ", " + r2 + ");";
+        File.saveString(string, path + saveFile);
+    }
 
     // update units for coordinate transformation
     if (action == "Transform Coordinates") {
