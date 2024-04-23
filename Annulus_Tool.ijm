@@ -7,8 +7,8 @@
  */
 
 // Changelog
-var version = "v4.9.0";
-var date = "20240418";
+var version = "v4.9.1";
+var date = "20240423";
 var changelog = "Add astronomical coordinate systems";
 
 // Global Variables
