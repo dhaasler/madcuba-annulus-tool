@@ -7,9 +7,10 @@
  */
 
 // Changelog
-var version = "v5.0.0";
+var version = "v5.0.1";
 var date = "20240423";
-var changelog = "Add ability to import and export the annulus roi in pixel coords";
+var changelog = "Add ability to import and export the annulus roi in pixel coords"
+                + "<br>Hotfix: fix import variable not found when transforming coords"
 
 // Global Variables
 // Mouse values and flags
@@ -232,8 +233,8 @@ macro "Annulus Tool Options" {
         newRadiiUnits = Dialog.getChoice();
         dumb3 = Dialog.getNumber();
         dumb4 = Dialog.getNumber();
-        dumb5 = Dialog.getCheckbox();
-        dumb6 = Dialog.getCheckbox();
+        import = Dialog.getCheckbox();
+        export = Dialog.getCheckbox();
         dumb7 = Dialog.getString();
         if (newCenterUnits == "Sexagesimal" && (newCoordSystem == "Gal" || newCoordSystem == "E2000" || newCoordSystem == "H2000")) {
             exit("Warning: Coordinate system " + newCoordSystem + " does not accept sexagesimal units");
