@@ -7,7 +7,7 @@
  */
 
 // Changelog
-var version = "v5.0.0a";
+var version = "v5.0.0";
 var date = "20240423";
 var changelog = "Add ability to export the annulus roi in pixel coords";
 

@@ -2,6 +2,7 @@
 
 | Version | Date       | Info                                                           | Details                                                           |
 | ------- | ---------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
+| v5.0.0  | 2024-04-23 | Add option to export RoIs                                      |                                                                   |
 | v4.9.0  | 2024-04-18 | Add astronomical coordinate systems                           | J2000, B1950, ICRS, Galactic, E2000, H2000                        |
 | v4.8.3  | 2024-04-18 | Change unit strings to a more readable format                  |                                                                   |
 | v4.8.2  | 2024-04-18 | Fix error when converting radii pixels to degrees              |                                                                   |
