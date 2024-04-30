@@ -12,8 +12,8 @@
 var version = "v5.0.1";
 var date = "20240423";
 var changelog = 
-    "Add ability to import and export the annulus roi in pixel coords"
-    + "<br>Hotfix: fix import variable not found when transforming coords"
+    "Add ability to import and export the annulus roi in pixel coords<br>"
+    + "Hotfix: fix import variable not found when transforming coords"
 
 // Global Variables
 // Mouse values and flags
