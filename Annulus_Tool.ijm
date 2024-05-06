@@ -35,6 +35,8 @@ var r1 = 10;
 var r2 = 15;
 var radiiUnits = "Pixels";
 var unitsVal = "Pixels";
+var roiKeyword = "pix";
+var radiiKeyword = "pix";
 
 var corr = 0;
 
@@ -121,14 +123,17 @@ macro "Annulus Tool - C037 O00ee O3388" {
 macro "Annulus Tool Options" {
     // transform everything to current units
     if (centerUnits == "Pixels") {
+        centerKeyword = "pix";
         newXcenter = globalXcenter;
         newYcenter = globalYcenter;
     }
     if (radiiUnits == "Pixels") {
+        radiiKeyword = "pix";
         newr1 = r1;
         newr2 = r2;
     }
     if (centerUnits == "Degrees") {
+        centerKeyword = "deg";
         /* cannot be changed at once because globalXcenter is used in the next 
         statement. We need temp variables xdeg and ydeg */
         xdeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordX", 
@@ -139,12 +144,14 @@ macro "Annulus Tool Options" {
         newYcenter = d2s(ydeg,6);
     }
     if (radiiUnits == "Degrees") {
+        radiiKeyword = "deg";
         r1deg = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         r2deg = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"));
         newr1 = d2s(r1deg,6);
         newr2 = d2s(r2deg,6);
     }
     if (centerUnits == "Arcmin") {
+        centerKeyword = "arcmin";
         xmin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", 
                                globalXcenter, globalYcenter, coordSystem)) * 60;
         ymin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY", 
@@ -153,12 +160,14 @@ macro "Annulus Tool Options" {
         newYcenter = ymin;
     }
     if (radiiUnits == "Arcmin") {
+        radiiKeyword = "arcmin";
         newr1 = 
             r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
         newr2 = 
             r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
     }
     if (centerUnits == "Arcsec") {
+        centerKeyword = "arcsec";
         xsec = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", 
                                globalXcenter, globalYcenter, coordSystem))
                                * 60 * 60;
@@ -169,12 +178,14 @@ macro "Annulus Tool Options" {
         newYcenter = ysec;
     }
     if (radiiUnits == "Arcsec") {
+        radiiKeyword = "arcsec";
         newr1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2")))
                 * 60 * 60;
         newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2")))
                 * 60 * 60;
     }
     if (centerUnits == "Radians") {
+        centerKeyword = "rad";
         xrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", 
                                globalXcenter, globalYcenter, coordSystem))
                                * PI/180.0;
@@ -185,12 +196,14 @@ macro "Annulus Tool Options" {
         newYcenter = d2s(yrad,8);
     }
     if (radiiUnits == "Radians") {
+        radiiKeyword = "rad";
         r1rad = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         r2rad = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         newr1 = d2s(r1rad,8);
         newr2 = d2s(r2rad,8);
     }
     if (centerUnits == "Sexagesimal") {
+        centerKeyword == "hdms";
         ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString", 
                   globalXcenter, globalYcenter, coordSystem);
         dec = call("CONVERT_PIXELS_COORDINATES.fits2CoordYString", 
@@ -289,6 +302,11 @@ macro "Annulus Tool Options" {
         }
     }
 
+    // export roi
+    if (export) {
+        exportAnnulus2();
+    }
+
     // transform everything back to pixels
     if (centerUnits == "Pixels") {
         globalXcenter = newXcenter;
@@ -369,16 +387,16 @@ macro "Annulus Tool Options" {
 
     // import toi
     if (import) {
-        importAnnulus();
+        importAnnulus2();
     }
 
     // paint annulus from options menu
     paintAnnulus();
 
-    // export roi
-    if (export) {
-        exportAnnulus();
-    }
+    // // export roi
+    // if (export) {
+    //     exportAnnulus();
+    // }
 
     // update units for coordinate transformation
     if (action == "Transform Coordinates") {
@@ -419,6 +437,18 @@ function exportAnnulus() {
 }
 
 /**
+ * Export the annulus as a text file storing its center coordinates
+ * and radii lengths
+ */
+function exportAnnulus2() {
+    /* there is no save file command, only open file */
+    path = getDirectory("Choose a Directory");
+    annulusCommand = "makeAnnulus(" + newXcenter + centerKeyword + ", " 
+                        + newYcenter + centerKeyword + ", " + newr1 + radiiKeyword + ", " + newr2 + radiiKeyword + ");";
+    File.saveString(annulusCommand, path + saveFile);
+}
+
+/**
  * Import an annulus from a .dat file
  */
 function importAnnulus() {
@@ -429,4 +459,38 @@ function importAnnulus() {
     globalYcenter = data[2];
     r1 = data[3];
     r2 = data[4];
+}
+
+/**
+ * Import an annulus from a .dat file
+ */
+function importAnnulus2() {
+    path = File.openDialog("Select a ROI File");
+    annulusCommand = File.openAsString(path);
+    data = split(annulusCommand, "(),");
+    for (j=0; j<data.length; j++) {
+        print("data[" + j + "]: '" + data[j] + "'");
+    }
+    coordUnits = newArray ("pix", "deg", "rad", "hdms", "arcmin", "arcsec");
+    units= 10;
+    parsedData = newArray(4);
+    parsedUnits = newArray(4);
+    for (k=1; k<5; k++) {
+        for (j=0; j<coordUnits.length; j++)
+            if (indexOf(data[k], coordUnits[j]) != -1) units=j; // read units
+        parsedData[k-1] = substring(data[k], 0, indexOf(data[k], coordUnits[units]));
+        parsedUnits[k-1] = coordUnits[units];
+    }
+    // globalXcenter = parsedData[1];
+    // globalYcenter = parsedData[2];
+    // r1 = parsedData[3];
+    // r2 = parsedData[4];
+    // globalXcenterUnits = parsedUnits[1];
+    // globalYcenterUnits = parsedUnits[2];
+    // r1Units = parsedUnits[3];
+    // r2Units = parsedUnits[4];
+    for (j=0; j<parsedData.length; j++) {
+        print("parsedData[" + j+1 + "]: '" + parsedData[j] + "'");
+        print("parsedUnits[" + j+1 + "]: '" + parsedUnits[j] + "'");
+    }
 }
