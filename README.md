@@ -1,6 +1,6 @@
 # MADCUBA Annulus Tool
 
-[![GitHub Release](https://img.shields.io/github/v/release/dhaasler/madcuba-annulus-tool)](https://github.com/dhaasler/madcuba-annulus-tool/releases/tag/v4.9.0)
+<!-- [![GitHub Release](https://img.shields.io/github/v/release/dhaasler/madcuba-annulus-tool)](https://github.com/dhaasler/madcuba-annulus-tool/releases/tag/v4.9.0) -->
 [![Static Badge](https://img.shields.io/badge/changelog-brightgreen)](CHANGELOG.md)
 
 MADCUBA tool for creating annular selections. [MADCUBA](https://cab.inta-csic.es/madcuba/) is a software developed in the spanish Center of Astrobiology (CSIC-INTA) to analyze astronomical datacubes, and is built using the ImageJ infrastructure. This tool will not work with any other ImageJ program.
@@ -39,8 +39,8 @@ The tool will then appear in the ImageJ Toolbar ready to be used.
 ## How to use
 
 Click and drag mouse to create the outer radius of the annulus.
-Click and drag while pressing 'alt' to create the inner radius.
-Click and drag while pressing 'ctrl' to move the annulus.
+Click and drag while pressing <kbd>Alt</kbd> to create the inner radius.
+Click and drag while pressing <kbd>Ctrl</kbd> to move the annulus.
 
 Double click or right-click the Tool icon to open the options menu where:
 
