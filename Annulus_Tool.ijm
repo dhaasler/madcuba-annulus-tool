@@ -369,13 +369,7 @@ macro "Annulus Tool Options" {
 
     // import toi
     if (import) {
-        path = File.openDialog("Select a ROI File");
-        annulusCommand = File.openAsString(path);
-        data = split(annulusCommand, "(),");
-        globalXcenter = data[1];
-        globalYcenter = data[2];
-        r1 = data[3];
-        r2 = data[4];
+        importAnnulus();
     }
 
     // paint annulus from options menu
@@ -383,11 +377,7 @@ macro "Annulus Tool Options" {
 
     // export roi
     if (export) {
-        /* there is no save file command, only open file */
-        path = getDirectory("Choose a Directory");
-        annulusCommand = "makeAnnulus(" + globalXcenter + ", " 
-                         + globalYcenter + ", " + r1 + ", " + r2 + ");";
-        File.saveString(annulusCommand, path + saveFile);
+        exportAnnulus();
     }
 
     // update units for coordinate transformation
@@ -414,4 +404,29 @@ function paintAnnulus() {
     setKeyDown("alt");
     makeOval(globalXcenter-r1, globalYcenter-r1, r1*2, r1*2);
     setKeyDown("none");
+}
+
+/**
+ * Export the annulus as a text file storing its center coordinates
+ * and radii lengths
+ */
+function exportAnnulus() {
+    /* there is no save file command, only open file */
+    path = getDirectory("Choose a Directory");
+    annulusCommand = "makeAnnulus(" + globalXcenter + ", " 
+                        + globalYcenter + ", " + r1 + ", " + r2 + ");";
+    File.saveString(annulusCommand, path + saveFile);
+}
+
+/**
+ * Import an annulus from a .dat file
+ */
+function importAnnulus() {
+    path = File.openDialog("Select a ROI File");
+    annulusCommand = File.openAsString(path);
+    data = split(annulusCommand, "(),");
+    globalXcenter = data[1];
+    globalYcenter = data[2];
+    r1 = data[3];
+    r2 = data[4];
 }
