@@ -2,6 +2,7 @@
 
 | Version | Date       | Info                                                                | Details                                                           |
 | ------- | ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| v5.1.0  | 2024-05-07 | Add ability to import and export the annulus roi in any coords      |                                                                   |
 | v5.0.1  | 2024-04-23 | Fix import and export variables not assigned if transforming coords |                                                                   |
 | v5.0.0  | 2024-04-23 | Add option to import and export RoIs                               | Currently only using FITS pixel coordinates                       |
 | v4.9.0  | 2024-04-18 | Add astronomical coordinate systems                                | J2000, B1950, ICRS, Galactic, E2000, H2000                        |
@@ -20,7 +21,7 @@
 | v4.1.1  | 2024-04-16 | Fix pixels to degrees conversion                                    |                                                                   |
 | v4.1    | 2024-04-15 | Add conversion between units                                       |                                                                   |
 | v4      | 2024-04-15 | Add coordinates system                                              |                                                                   |
-| v3.1    | 2024-04-12 | Change ROI manager to Overlay                                       |                                                                   |
+| v3.1    | 2024-04-12 | Change ROI manager to Overlay for temporary representation          |                                                                   |
 | v3      | 2024-04-12 | Add drag and draw both radii of the annulus                         |                                                                   |
 | v2.1    | 2024-04-12 | Change UI to offer paint checkbox                                   |                                                                   |
 | v2      | 2024-04-12 | Add options menu to select annulus with input paremeters            |                                                                   |
