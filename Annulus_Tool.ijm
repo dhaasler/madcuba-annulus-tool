@@ -223,10 +223,10 @@ macro "Annulus Tool Options" {
 
     // export roi has preference over import annulus
     if (import) {
-        importAnnulus2();
+        importAnnulus();
     // import roi
     } else if (export) {
-        exportAnnulus2(saveFile);
+        exportAnnulus(saveFile);
     }
 
     // transform everything back to pixels
