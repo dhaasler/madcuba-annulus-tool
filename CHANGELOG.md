@@ -2,6 +2,7 @@
 
 | Version | Date       | Info                                                                | Details                                                           |
 | ------- | ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 5.2     | 2024-05-09 | Re-designed options menu                                            |                                                                   |
 | 5.1.3   | 2024-05-09 | Fix reading coordinates units when importing                       |                                                                   |
 | 5.1.2   | 2024-05-09 | Add coordinate system to exported file                              |                                                                   |
 | 5.1.1   | 2024-05-09 | Hotfix: Fix spectrum not updating after painting annulus            |                                                                   |

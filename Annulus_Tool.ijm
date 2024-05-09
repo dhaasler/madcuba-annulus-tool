@@ -24,10 +24,10 @@
  */
 
 // Changelog
-var version = "v5.1.3";
+var version = "v5.2";
 var date = "20240509";
 var changelog = 
-    "Fix coordinates units when importing."
+    "Re-designed options UI."
 
 // Global Variables
 // Mouse values and flags
@@ -52,7 +52,6 @@ var newr2 = 15;
 var r1 = 10;
 var r2 = 15;
 var radiiUnits = "Pixels";
-var unitsVal = "Pixels";
 var centerKeyword = "pix";
 var radiiKeyword = "pix";
 
@@ -153,39 +152,48 @@ macro "Annulus Tool Options" {
                                    "Arcmin", "Arcsec");
     Dialog.create("Annulus Tool");
     actionOptions = newArray("Paint Annulus", "Transform Coordinates");
-    Dialog.addRadioButtonGroup("Action", actionOptions, 1, 2, "Paint Annulus");
+    Dialog.addMessage("Press the \"Help\" button below to read instructions\n"
+                     + "on how to use this tool to avoid unexpected behaviour.")
+    Dialog.setInsets(5, 0, 5);
+    Dialog.addRadioButtonGroup("", actionOptions, 1, 2, "Paint Annulus");
+    Dialog.setInsets(12, 0, 0);
     Dialog.addChoice("Center units:", availableCenterUnits, centerUnits);
     Dialog.addToSameRow();
     Dialog.addChoice("", availableCoordSystems, coordSystem);
-    Dialog.addString("X:", newXcenter, 15);
-    Dialog.addString("Y:", newYcenter, 15);
+    Dialog.addString("X:", newXcenter, 13);
+    Dialog.addString("Y:", newYcenter, 13);
     Dialog.addChoice("Radii units:", availableRadiiUnits, radiiUnits);
     Dialog.addString("Inner radius:", newr1, 10);
     Dialog.addString("Outer radius:", newr2, 10);
+    Dialog.setInsets(15, 80, 5);
     Dialog.addCheckbox("Import ROI", false);
-    Dialog.addCheckbox("Export ROI", false);
-    // Dialog.addToSameRow();
-    Dialog.addString("Saved file name", "annulus.mcroi", 16);
+    Dialog.setInsets(0, 80, 5);
+    Dialog.addCheckbox("Export ROI as", false);
+    Dialog.addToSameRow();
+    Dialog.addString("", "annulus.mcroi", 15);
     html = "<html>"
     + "<center><h2>Annulus Tool</h2></center>"
+    + "<h3>GUI Tool</h3>"
     + "Click and drag mouse to create the outer radius of the annulus.<br>"
     + "Click and drag while pressing 'alt' to create the inner radius.<br>"
-    + "Click and drag while pressing 'ctrl' to move the annulus.<br><br>"
+    + "Click and drag while pressing 'ctrl' to move the annulus.<br>"
+    + "<h3>Options Menu</h3>"
     + "To paint an annulus with given coordinates select the \"Paint<br>"
-    + "Annulus\" option, select the desired units and coordinate system,<br>"
+    + "Annulus\" option, select the desired units and coordinates system,<br>"
     + "and input the corresponding values.<br><br>"
     + "To convert the current parameters to other units or coordinate<br>"
     + "systems, select the \"Transform Coordinates\" option, select the<br>"
-    + "desired units and coordinate system from the dropdown menus,<br>"
+    + "desired units and coordinates system from the dropdown menus,<br>"
     + "and re-open the options window. Note that this option will ignore<br>"
-    + "input values and will use the previously selected annulus.<br><br>"
+    + "input values and will use the previously selected annulus.<br>"
+    + "<h4>Import or export an annulus</h4>"
     + "To import an annulus from a text file, check the \"Import ROI\"<br>"
     + "checkbox. A window will appear asking the user to select the<br>"
     + "annulus file.<br>"
     + "To export the annulus as a text file, check the \"Export ROI\"<br>"
     + "checkbox and input the desired file name. A window will appear<br>"
     + "asking the user to select the Folder in which to save the file.<br><br>"
-    + "<h4>Changelog</h4>"
+    + "<h2>Changelog</h2>"
     + version + " - " + date + " <br>"
     + changelog;
     Dialog.addHelp(html);
