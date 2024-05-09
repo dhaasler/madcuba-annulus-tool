@@ -2,29 +2,30 @@
 
 | Version | Date       | Info                                                                | Details                                                           |
 | ------- | ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| v5.1.2  | 2024-05-09 | Add coordinate system to exported file                              |                                                                   |
-| v5.1.1  | 2024-05-09 | Hotfix: Fix spectrum not updating after painting annulus            |                                                                   |
-| v5.1.0  | 2024-05-07 | Add ability to import and export the annulus roi in any coords      |                                                                   |
-| v5.0.1  | 2024-04-23 | Fix import and export variables not assigned if transforming coords |                                                                   |
-| v5.0.0  | 2024-04-23 | Add option to import and export RoIs                               | Currently only using FITS pixel coordinates                       |
-| v4.9.0  | 2024-04-18 | Add astronomical coordinate systems                                | J2000, B1950, ICRS, Galactic, E2000, H2000                        |
-| v4.8.3  | 2024-04-18 | Change unit strings to a more readable format                       |                                                                   |
-| v4.8.2  | 2024-04-18 | Fix error when converting radii pixels to degrees                   |                                                                   |
-| v4.8.1  | 2024-04-17 | Fix exception error when closing the options menu                  | Use local variable for representation of values in options window |
-| v4.8    | 2024-04-17 | Add sexagesimal coordinates                                         |                                                                   |
-| v4.7    | 2024-04-17 | Change representation of values in options menu as strings          |                                                                   |
-| v4.6    | 2024-04-16 | Add arcmin and arcsec as available units                            |                                                                   |
-| v4.5.1  | 2024-04-16 | Add correction to ImageJ to Fits conversion                         |                                                                   |
-| v4.5    | 2024-04-16 | Change UI to offer two options: Paint Annulus or Convert units      |                                                                   |
-| v4.3    | 2024-04-16 | Separate center and radii units                                     |                                                                   |
-| v4.2    | 2024-04-16 | Add radians as available units                                      |                                                                   |
-| v4.1.3  | 2024-04-16 | Add error messages when no selection is present                     |                                                                   |
-| v4.1.2  | 2024-04-16 | Fix incorrect center definition after moving annulus                |                                                                   |
-| v4.1.1  | 2024-04-16 | Fix pixels to degrees conversion                                    |                                                                   |
-| v4.1    | 2024-04-15 | Add conversion between units                                       |                                                                   |
-| v4      | 2024-04-15 | Add coordinates system                                              |                                                                   |
-| v3.1    | 2024-04-12 | Change ROI manager to Overlay for temporary representation          |                                                                   |
-| v3      | 2024-04-12 | Add drag and draw both radii of the annulus                         |                                                                   |
-| v2.1    | 2024-04-12 | Change UI to offer paint checkbox                                   |                                                                   |
-| v2      | 2024-04-12 | Add options menu to select annulus with input paremeters            |                                                                   |
-| v1      | 2024-04-11 | Paint annulus by clicking in an image with default parameters       |                                                                   |
+| 5.1.3   | 2024-05-09 | Fix reading coordinates units when importing                       |                                                                   |
+| 5.1.2   | 2024-05-09 | Add coordinate system to exported file                              |                                                                   |
+| 5.1.1   | 2024-05-09 | Hotfix: Fix spectrum not updating after painting annulus            |                                                                   |
+| 5.1.0   | 2024-05-07 | Add ability to import and export the annulus roi in any coords      |                                                                   |
+| 5.0.1   | 2024-04-23 | Fix import and export variables not assigned if transforming coords |                                                                   |
+| 5.0.0   | 2024-04-23 | Add option to import and export RoIs                               | Currently only using FITS pixel coordinates                       |
+| 4.9.0   | 2024-04-18 | Add astronomical coordinate systems                                | J2000, B1950, ICRS, Galactic, E2000, H2000                        |
+| 4.8.3   | 2024-04-18 | Change unit strings to a more readable format                       |                                                                   |
+| 4.8.2   | 2024-04-18 | Fix error when converting radii pixels to degrees                   |                                                                   |
+| 4.8.1   | 2024-04-17 | Fix exception error when closing the options menu                  | Use local variable for representation of values in options window |
+| 4.8     | 2024-04-17 | Add sexagesimal coordinates                                         |                                                                   |
+| 4.7     | 2024-04-17 | Change representation of values in options menu as strings          |                                                                   |
+| 4.6     | 2024-04-16 | Add arcmin and arcsec as available units                            |                                                                   |
+| 4.5.1   | 2024-04-16 | Add correction to ImageJ to Fits conversion                         |                                                                   |
+| 4.5     | 2024-04-16 | Change UI to offer two options: Paint Annulus or Convert units      |                                                                   |
+| 4.3     | 2024-04-16 | Separate center and radii units                                     |                                                                   |
+| 4.2     | 2024-04-16 | Add radians as available units                                      |                                                                   |
+| 4.1.3   | 2024-04-16 | Add error messages when no selection is present                     |                                                                   |
+| 4.1.2   | 2024-04-16 | Fix incorrect center definition after moving annulus                |                                                                   |
+| 4.1.1   | 2024-04-16 | Fix pixels to degrees conversion                                    |                                                                   |
+| 4.1     | 2024-04-15 | Add conversion between units                                       |                                                                   |
+| 4       | 2024-04-15 | Add coordinates system                                              |                                                                   |
+| 3.1     | 2024-04-12 | Change ROI manager to Overlay for temporary representation          |                                                                   |
+| 3       | 2024-04-12 | Add drag and draw both radii of the annulus                         |                                                                   |
+| 2.1     | 2024-04-12 | Change UI to offer paint checkbox                                   |                                                                   |
+| 2       | 2024-04-12 | Add options menu to select annulus with input paremeters            |                                                                   |
+| 1       | 2024-04-11 | Paint annulus by clicking in an image with default parameters       |                                                                   |

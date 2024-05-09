@@ -24,11 +24,10 @@
  */
 
 // Changelog
-var version = "v5.1.2";
+var version = "v5.1.3";
 var date = "20240509";
 var changelog = 
-    "Add ability to import and export the annulus roi in any<br>"
-    + "coordinates system."
+    "Fix coordinates units when importing."
 
 // Global Variables
 // Mouse values and flags
@@ -212,11 +211,11 @@ macro "Annulus Tool Options" {
         if (centerUnits == "Sexagesimal"
             && (coordSystem == "Gal" || coordSystem == "E2000"
                 || coordSystem == "H2000")) {
-            exit("Warning: Coordinate system " + coordSystem
+            exit("Warning: coordinates system " + coordSystem
                  + " does not accept sexagesimal units");
         }
     } else { // transform parameters
-        newCenterUnits = Dialog.getChoice();
+        transformCenterUnits = Dialog.getChoice();
         transformCoordSystem = Dialog.getChoice();
         dumb1 = Dialog.getString();
         dumb2 = Dialog.getString();
@@ -226,10 +225,10 @@ macro "Annulus Tool Options" {
         import = Dialog.getCheckbox();
         export = Dialog.getCheckbox();
         saveFile = Dialog.getString();
-        if (newCenterUnits == "Sexagesimal"
+        if (transformCenterUnits == "Sexagesimal"
             && (transformCoordSystem == "Gal" || transformCoordSystem == "E2000"
                 || transformCoordSystem == "H2000")) {
-            exit("Warning: Coordinate system " + transformCoordSystem 
+            exit("Warning: coordinates system " + transformCoordSystem 
                  + " does not accept sexagesimal units");
         }
     }
@@ -246,9 +245,9 @@ macro "Annulus Tool Options" {
     // paint annulus from options menu
     paintAnnulus();
 
-    // update units for coordinate transformation
+    // update units for coordinates transformation
     if (action == "Transform Coordinates") {
-        centerUnits = newCenterUnits;
+        centerUnits = transformCenterUnits;
         radiiUnits = newRadiiUnits;
         coordSystem = transformCoordSystem;
     }
@@ -287,11 +286,13 @@ function paintAnnulus() {
 function exportAnnulus(saveFile) {
     /* there is no save file command, only open file */
     path = getDirectory("Choose a Directory");
-    annulusInfo = "# MADCUBA ROI file format. makeAnnulus(X_center, Y_center, R1, R2)\n";
+    annulusInfo = "# MADCUBA ROI file format. "
+                + "makeAnnulus(X_center, Y_center, R1, R2)\n";
     annulusCommand = "makeAnnulus(" + newXcenter + centerKeyword + ", "
                                     + newYcenter + centerKeyword + ", "
                                     + newr1 + radiiKeyword + ", "
-                                    + newr2 + radiiKeyword + ", " + coordSystem + ");";
+                                    + newr2 + radiiKeyword + ", "
+                                    + coordSystem + ");";
     File.saveString(annulusInfo+annulusCommand, path + saveFile);
 }
 
@@ -303,25 +304,31 @@ function importAnnulus() {
     annulusFile = File.openAsString(path);
     rows = split(annulusFile,"\n\r");
     data = split(rows[1], "(),"); // read only the data row
-    coordUnits = newArray ("pix", "deg", "rad", "hdms", "arcmin", "arcsec");
+    coordKeywords = newArray ("pix", "deg", "rad", "hdms", "arcmin", "arcsec");
+    coordUnits = newArray("Pixels", "Degrees", "Radians",
+                          "Sexagesimal", "Arcmin", "Arcsec");
     units= 10;
     parsedData = newArray(4);
-    parsedUnits = newArray(4);
+    parsedKeywords = newArray(4);
     for (k=1; k<5; k++) {
-        for (j=0; j<coordUnits.length; j++)
-            if (indexOf(data[k], coordUnits[j]) != -1) units=j; // read units
+        for (j=0; j<coordKeywords.length; j++) // read units
+            if (indexOf(data[k], coordKeywords[j]) != -1) units=j;
         if (units == 10) {
-            exit("Warning: Coordinate units not found");
+            exit("Warning: Coordinates units not found");
         }
-        parsedData[k-1] = substring(data[k], 0, indexOf(data[k], coordUnits[units]));
-        parsedUnits[k-1] = coordUnits[units];
+        parsedData[k-1] =
+            substring(data[k], 0, indexOf(data[k], coordKeywords[units]));
+        parsedKeywords[k-1] = coordKeywords[units];
     }
     newXcenter = parsedData[0];
     newYcenter = parsedData[1];
     newr1 = parsedData[2];
     newr2 = parsedData[3];
-    newCenterUnits = parsedUnits[0];
-    newRadiiUnits = parsedUnits[2];
+    centerKeyword = parsedKeywords[0];
+    for (j=0; j<coordKeywords.length; j++) // read units
+        if (indexOf(centerKeyword, coordKeywords[j]) == 0) coordIndex=j;
+    centerUnits = coordUnits[coordIndex];
+    newRadiiUnits = parsedKeywords[2];
     coordSystem = substring(data[5], 1, lengthOf(data[5]));
 }
 
@@ -390,7 +397,7 @@ function pix2coords() {
                    globalXcenter, globalYcenter, coordSystem);
         newXcenter = ra;
         newYcenter = dec;
-    } else exit("Error: Center coordinate units not found.");
+    } else exit("Error: Center coordinates units not found.");
     // transform radii units to selected coordinates
     if (radiiUnits == "Pixels") {
         radiiKeyword = "pix";
@@ -420,7 +427,7 @@ function pix2coords() {
         r2rad = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * PI/180.0;
         newr1 = d2s(r1rad,8);
         newr2 = d2s(r2rad,8);
-    } else exit("Error: Radii coordinate units not found.");
+    } else exit("Error: Radii coordinates units not found.");
 }
 
 /**
@@ -472,7 +479,7 @@ function coords2pix() {
                         newXcenter, newYcenter, coordSystem);
         globalXcenter = rapix;
         globalYcenter = decpix;
-    } else exit("Error: Center coordinate units not found.");
+    } else exit("Error: Center coordinates units not found.");
     // transform radii units back to pixels
     if (radiiUnits == "Pixels") {
         r1 = parseFloat(newr1);
@@ -495,5 +502,5 @@ function coords2pix() {
                 * 180.0/PI;
         r2 = parseFloat(newr2) / parseFloat(call("FITS_CARD.getDbl","CDELT2"))
                 * 180.0/PI;
-    } else exit("Error: Radii coordinate units not found.");
+    } else exit("Error: Radii coordinates units not found.");
 }
