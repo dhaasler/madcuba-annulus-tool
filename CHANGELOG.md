@@ -2,6 +2,8 @@
 
 | Version | Date       | Info                                                                | Details                                                           |
 | ------- | ---------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| v5.1.2  | 2024-05-09 | Add coordinate system to exported file                              |                                                                   |
+| v5.1.1  | 2024-05-09 | Hotfix: Fix spectrum not updating after painting annulus            |                                                                   |
 | v5.1.0  | 2024-05-07 | Add ability to import and export the annulus roi in any coords      |                                                                   |
 | v5.0.1  | 2024-04-23 | Fix import and export variables not assigned if transforming coords |                                                                   |
 | v5.0.0  | 2024-04-23 | Add option to import and export RoIs                               | Currently only using FITS pixel coordinates                       |

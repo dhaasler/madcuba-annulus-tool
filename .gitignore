@@ -1,5 +1,8 @@
 ## My ignored files
 
+# Test annulus file
+annulus.mcroi
+
 # Testing images
 images/
 
