@@ -1,11 +1,11 @@
 # MADCUBA Annulus Tool
 
-[![GitHub Release](https://img.shields.io/github/v/release/dhaasler/madcuba-annulus-tool)](https://github.com/dhaasler/madcuba-annulus-tool/releases/tag/v5.2.0)
+[![GitHub Release](https://img.shields.io/github/v/release/dhaasler/madcuba-annulus-tool)](https://github.com/dhaasler/madcuba-annulus-tool/releases/tag/v5.5.0)
 [![Static Badge](https://img.shields.io/badge/changelog-brightgreen)](CHANGELOG.md)
 
 MADCUBA tool for creating annular selections. [MADCUBA](https://cab.inta-csic.es/madcuba/) is a software developed in the spanish Center of Astrobiology (CSIC-INTA) to analyze astronomical datacubes, and is built using the ImageJ infrastructure. This tool will not work with any other ImageJ program.
 
-This tool is developed to be used with MADCUBA v10. With this tool the user can select an annular region by clicking and dragging in an image, or by inputting the annulus parameters through an options window.
+This version of the tool is developed to be used with MADCUBA v11. With this tool the user can select an annular region by clicking and dragging in an image, or by inputting the annulus parameters through an options window.
 
 The annulus is parametrized by its center and its two radii:
 
@@ -43,8 +43,8 @@ To check the installed version and read the instructions from within MADCUBA, se
 ### GUI Tool
 
 Click and drag mouse to create the outer radius of the annulus.
-Click and drag while pressing <kbd>Alt</kbd> to create the inner radius.
-Click and drag while pressing <kbd>Ctrl</kbd> to move the annulus.
+Click and drag while pressing `<kbd>`Alt`</kbd>` to create the inner radius.
+Click and drag while pressing `<kbd>`Ctrl`</kbd>` to move the annulus.
 
 ### Options Menu
 
@@ -56,5 +56,5 @@ Double click or right-click the Tool icon to open the options menu where:
 
 #### Import or export an annulus
 
-To import an annulus from a text file, check the "Import ROI" checkbox. A window will appear asking the user to select the annulus file.  
+To import an annulus from a text file, check the "Import ROI" checkbox. A window will appear asking the user to select the annulus file.
 To export the annulus as a text file, check the "Export ROI" checkbox and input the desired file name. A window will appear asking the user to select the Folder in which to save the file.

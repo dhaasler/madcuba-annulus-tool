@@ -24,10 +24,10 @@
  */
 
 // Changelog
-var version = "v5.2";
-var date = "20240509";
+var version = "v5.5";
+var date = "20240528";
 var changelog = 
-    "Re-designed options UI."
+    "Update to MADCUBA v11"
 
 // Global Variables
 // Mouse values and flags
@@ -55,21 +55,20 @@ var radiiUnits = "Pixels";
 var centerKeyword = "pix";
 var radiiKeyword = "pix";
 
-var corr = 0;
-
 macro "Annulus Tool - C037 O00ee O3388" {
     getCursorLoc(x, y, z, flags);
     xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
     yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
-    xcenter = xFits; ycenter = yFits;
+    xcenter = xFits;
+    ycenter = yFits;
     // create second oval and then the annulus
-    if (flags&alt!=0) {
+    if (flags&alt != 0) {
         if (selectionType == -1) {  /* abort macro if outer oval is not set */
             exit("Error: Inner radius cannot be created with no outer radius "
             + "present. Create one first.");
         }
-        Overlay.addSelection; // paint outer oval while selecting inner oval
-        while ((flags&leftButton)!=0) {
+        Overlay.addSelection; /* paint outer oval while selecting inner oval */
+        while ((flags&leftButton) != 0) {
             getCursorLoc(x, y, z, flags);
             xFits = 
                 parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
@@ -77,7 +76,7 @@ macro "Annulus Tool - C037 O00ee O3388" {
                 parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
             dx = (xFits - globalXcenter);
             dy = (yFits - globalYcenter);
-            r1 = sqrt(dx*dx + dy*dy);
+            r1 = round(sqrt(dx*dx + dy*dy));
             makeOval(globalXcenter-r1, globalYcenter-r1, r1*2, r1*2);
             wait(20);
         }
@@ -87,50 +86,48 @@ macro "Annulus Tool - C037 O00ee O3388" {
         exit;
     /* Move selection. First calculate the new location using ImageJ 
     coordinates. Then set it using Fits coords */
-    } else if (flags&ctrl!=0) {
+    } else if (flags&ctrl != 0) {
         if (selectionType == -1) {
             exit("Error: Cannot move selection. There is no selection present");
         }
         getBoundingRect(x2, y2, w, h);
         getCursorLoc(x0, y0, z0, flags0); /* store information of where I first 
                                              clicked inside the ROI */
-        while ((flags&leftButton)!=0) {
+        while ((flags&leftButton) != 0) {
             getCursorLoc(x, y, z, flags);
             // calculate new the position inside the RoI after moving
             dx = x - (x0 - x2);
-            dy = y - (y0 - y2) - 1; /* -1 because after clicking, the selection
-                                       moves 1 pixel down (may be a problem of
-                                       coords transformation) */
+            dy = y - (y0 - y2) + 1; /* +1 because after clicking, the selection
+                                       moves 1 pixel up (a problem with ImageJ
+                                       coordinates) */
             dxFits = 
                 parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", dx));
             dyFits = 
                 parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", dy));
             setSelectionLocation(dxFits, dyFits); /* this option moves the
-                                                     center with integers */
+                                                  center with integer values */
             wait(20);
         }
         wait(10);
+        /* Update global center values */
         getBoundingRect(x3, y3, w, h);
+        /* Same correction as before is needed */
         x3Fits = 
             parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x3));
         y3Fits = 
             parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y3));
         globalXcenter = x3Fits + w/2;
-        /* if trying to paint it with the Options Menu it will move 
-        the annulus slightly because the menu paints with ovals that
-        accept float values and rounds them later into integers */
-        globalYcenter = y3Fits - h/2 + 1; /* +1 because of problems converting 
-                                             from ImageJ to Fits */
+        globalYcenter = y3Fits - h/2;
         exit;
     }
     // create outer oval
-    while ((flags&leftButton)!=0) {
+    while ((flags&leftButton) != 0) {
         getCursorLoc(x, y, z, flags);
         xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
         yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
         dx = (xFits - xcenter);
         dy = (yFits - ycenter);
-        r2 = sqrt(dx*dx + dy*dy);
+        r2 = round(sqrt(dx*dx + dy*dy));
         makeOval(xcenter-r2, ycenter-r2, r2*2, r2*2);
         wait(20);
     }
@@ -274,11 +271,17 @@ macro "Annulus Tool Options" {
 
 /**
  * Paint an annulus using global variables.
+ * 
+ * In MADCUBA 11, a correct FITS system was implemented. Using real FITS
+ * coordinates for corners (X.5, Y.5) will make the low-precision of the
+ * conversion between pixels and coordinates shift the oval one pixel down
+ * and/or to the left if the values are <.5. By manually rounding to the nearest
+ * corner (.5) when painting, this problem gets solved. 
  */
 function paintAnnulus() {
-    makeOval(globalXcenter-r2, globalYcenter-r2, r2*2, r2*2);
+    makeOval(floor(globalXcenter-r2)+0.5, floor(globalYcenter-r2)+0.5, r2*2, r2*2);
     setKeyDown("alt");
-    makeOval(globalXcenter-r1, globalYcenter-r1, r1*2, r1*2);
+    makeOval(floor(globalXcenter-r1)+0.5, floor(globalYcenter-r1)+0.5, r1*2, r1*2);
     setKeyDown("none");
     /* if GET SPECTRUM is launched too closely after the previous code sometimes
     it prompts an error message: CANNOT GENERATE SPECTRUM. With a little wait
@@ -357,8 +360,8 @@ function pix2coords() {
                     globalXcenter, globalYcenter, coordSystem);
         ydeg = call("CONVERT_PIXELS_COORDINATES.fits2CoordY", 
                     globalXcenter, globalYcenter, coordSystem);
-        newXcenter = d2s(xdeg,6);
-        newYcenter = d2s(ydeg,6);
+        newXcenter = d2s(xdeg,8);
+        newYcenter = d2s(ydeg,8);
     } else if (centerUnits == "Arcmin") {
         centerKeyword = "arcmin";
         xmin = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordX", 
@@ -395,8 +398,8 @@ function pix2coords() {
         yrad = parseFloat(call("CONVERT_PIXELS_COORDINATES.fits2CoordY",
                                globalXcenter, globalYcenter, coordSystem))
                                * PI/180.0;
-        newXcenter = d2s(xrad,8);
-        newYcenter = d2s(yrad,8);
+        newXcenter = d2s(xrad,10);
+        newYcenter = d2s(yrad,10);
     } else if (centerUnits == "Sexagesimal") {
         centerKeyword = "hdms";
         ra = call("CONVERT_PIXELS_COORDINATES.fits2CoordXString",
@@ -420,14 +423,14 @@ function pix2coords() {
     } else if (radiiUnits == "Arcmin") {
         radiiKeyword = "arcmin";
         newr1 = 
-            r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
+            r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 60;
         newr2 = 
-            r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2"))) * 60;
+            r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2")) * 60;
     } else if (radiiUnits == "Arcsec") {
         radiiKeyword = "arcsec";
-        newr1 = r1 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2")))
+        newr1 = r1 * parseFloat(call("FITS_CARD.getDbl","CDELT2"))
                 * 60 * 60;
-        newr2 = r2 * parseFloat(parseFloat(call("FITS_CARD.getDbl","CDELT2")))
+        newr2 = r2 * parseFloat(call("FITS_CARD.getDbl","CDELT2"))
                 * 60 * 60;
     } else if (radiiUnits == "Radians") {
         radiiKeyword = "rad";
