@@ -25,7 +25,7 @@
 
 // Changelog
 var version = "v5.5";
-var date = "20240528";
+var date = "20240530";
 var changelog = 
     "Update to MADCUBA v11"
 
@@ -57,6 +57,10 @@ var radiiKeyword = "pix";
 
 macro "Annulus Tool - C037 O00ee O3388" {
     getCursorLoc(x, y, z, flags);
+    /* getCursorLoc selects the lower-left corner of the clicked pixel.
+    Add 0.5 to each value to set the center point in the middle of the pixel */
+    x = x + 0.5;
+    y = y + 0.5;
     xFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsX", x));
     yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
     xcenter = xFits;
@@ -76,7 +80,8 @@ macro "Annulus Tool - C037 O00ee O3388" {
                 parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
             dx = (xFits - globalXcenter);
             dy = (yFits - globalYcenter);
-            r1 = round(sqrt(dx*dx + dy*dy));
+            /* Round r1 to the closest .5 value to force integer diameter. */
+            r1 = floor(sqrt(dx*dx + dy*dy))+0.5;
             makeOval(globalXcenter-r1, globalYcenter-r1, r1*2, r1*2);
             wait(20);
         }
@@ -127,7 +132,8 @@ macro "Annulus Tool - C037 O00ee O3388" {
         yFits = parseFloat(call("CONVERT_PIXELS_COORDINATES.imageJ2FitsY", y));
         dx = (xFits - xcenter);
         dy = (yFits - ycenter);
-        r2 = round(sqrt(dx*dx + dy*dy));
+        /* Round r2 to the closest .5 value to force integer diameter. */
+        r2 = floor(sqrt(dx*dx + dy*dy))+0.5;
         makeOval(xcenter-r2, ycenter-r2, r2*2, r2*2);
         wait(20);
     }
@@ -272,16 +278,27 @@ macro "Annulus Tool Options" {
 /**
  * Paint an annulus using global variables.
  * 
- * In MADCUBA 11, a correct FITS system was implemented. Using real FITS
- * coordinates for corners (X.5, Y.5) will make the low-precision of the
- * conversion between pixels and coordinates shift the oval one pixel down
- * and/or to the left if the values are <.5. By manually rounding to the nearest
- * corner (.5) when painting, this problem gets solved. 
+ * In MADCUBA 11, a correct FITS system was implemented: corners in (X.5, Y.5).
+ * Using sub-pixel precision will make the low-precision of the conversion
+ * between pixels and coordinates shift one oval one pixel down and/or to the
+ * left if the values for the center are <.5 (between two pixels), rendering the
+ * two ovals non-concentric.
+ * By manually rounding the center to the center of the pixel it is located at,
+ * and the radii to a .5 value this problem gets solved. This is also what is
+ * coded into the interactive creation of the ovals.
+ * Note that this approximation is only for te visual representation in MADCUBA,
+ * the exported internal and exported values are still float values.
  */
 function paintAnnulus() {
-    makeOval(floor(globalXcenter-r2)+0.5, floor(globalYcenter-r2)+0.5, r2*2, r2*2);
+    paintR1 = floor(r1) + 0.5;
+    paintR2 = floor(r2) + 0.5;
+    outerX0 = round(globalXcenter) - paintR2;
+    outerY0 = round(globalYcenter) - paintR2;
+    innerX0 = round(globalXcenter) - paintR1;
+    innerY0 = round(globalYcenter) - paintR1;
+    makeOval(outerX0, outerY0, paintR2*2, paintR2*2);
     setKeyDown("alt");
-    makeOval(floor(globalXcenter-r1)+0.5, floor(globalYcenter-r1)+0.5, r1*2, r1*2);
+    makeOval(innerX0, innerY0, paintR1*2, paintR1*2);
     setKeyDown("none");
     /* if GET SPECTRUM is launched too closely after the previous code sometimes
     it prompts an error message: CANNOT GENERATE SPECTRUM. With a little wait
