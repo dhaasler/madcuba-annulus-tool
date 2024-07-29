@@ -42,16 +42,16 @@ To check the installed version and read the instructions from within MADCUBA, se
 
 ### GUI Tool
 
-Click and drag mouse to create the outer radius of the annulus.
-Click and drag while pressing `<kbd>`Alt`</kbd>` to create the inner radius.
-Click and drag while pressing `<kbd>`Ctrl`</kbd>` to move the annulus.
+- Click and drag mouse to create the outer radius of the annulus.
+- Click and drag while pressing <kbd>Alt</kbd> to create the inner radius.
+- Click and drag while pressing <kbd>Ctrl</kbd> to move the annulus.
 
 ### Options Menu
 
 Double click or right-click the Tool icon to open the options menu where:
 
 1. To paint an annulus with given coordinates select the "Paint Annulus" option, select the desired units and coordinate system, and input the corresponding values.
-2. To convert the current parameters to other units or coordinate systems, select the \"Transform coordinates" option, select the desired units and coordinate system from the dropdown menus, and re-open the options window.
+2. To convert the current parameters to other units or coordinate systems, select the \"Transform coordinates" option, select the desired units and coordinate system from the dropdown menus, and re-open the options window.  
    Note that this option will ignore input values and will use the previously selected annulus.
 
 #### Import or export an annulus
