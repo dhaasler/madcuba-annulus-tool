@@ -24,10 +24,10 @@
  */
 
 // Changelog
-var version = "v5.5";
-var date = "20240530";
+var version = "v5.6";
+var date = "20241030";
 var changelog = 
-    "Update to MADCUBA v11"
+    "Update to new .mcroi format"
 
 // Global Variables
 // Mouse values and flags
@@ -314,14 +314,19 @@ function paintAnnulus() {
 function exportAnnulus(saveFile) {
     /* there is no save file command, only open file */
     path = getDirectory("Choose a Directory");
-    annulusInfo = "# MADCUBA ROI file format. "
+    annulusInfo = "// MADCUBA ROI file: "
                 + "makeAnnulus(X_center, Y_center, R1, R2)\n";
+    // if (centerUnits == "Pixels") exportUnits = "Pixel";
+    // else exportUnits = "World";
+    // unitsInfo = "// " + exportUnits + "\n";
+    unitsInfo = "// Unused\n";
+    coordSystemInfo = "// " + coordSystem + "\n";
     annulusCommand = "makeAnnulus(" + newXcenter + centerKeyword + ", "
                                     + newYcenter + centerKeyword + ", "
                                     + newr1 + radiiKeyword + ", "
-                                    + newr2 + radiiKeyword + ", "
-                                    + coordSystem + ");";
-    File.saveString(annulusInfo+annulusCommand, path + saveFile);
+                                    + newr2 + radiiKeyword + ");";
+    File.saveString(annulusInfo+unitsInfo+coordSystemInfo+annulusCommand,
+                    path + saveFile);
 }
 
 /**
@@ -331,7 +336,7 @@ function importAnnulus() {
     path = File.openDialog("Select a ROI File");
     annulusFile = File.openAsString(path);
     rows = split(annulusFile,"\n\r");
-    data = split(rows[1], "(),"); // read only the data row
+    data = split(rows[3], "(),"); // read only the data row
     coordKeywords = newArray ("pix", "deg", "rad", "hdms", "arcmin", "arcsec");
     coordUnits = newArray("Pixels", "Degrees", "Radians",
                           "Sexagesimal", "Arcmin", "Arcsec");
@@ -357,7 +362,7 @@ function importAnnulus() {
         if (indexOf(centerKeyword, coordKeywords[j]) == 0) coordIndex=j;
     centerUnits = coordUnits[coordIndex];
     newRadiiUnits = parsedKeywords[2];
-    coordSystem = substring(data[5], 1, lengthOf(data[5]));
+    coordSystem = substring(rows[2], 3, lengthOf(rows[2]));
 }
 
 /**
